@@ -1,6 +1,7 @@
 package com.mealbroker.restaurant.service.impl;
 
 import com.mealbroker.domain.*;
+import com.mealbroker.domain.error.ErrorResponse;
 import com.mealbroker.restaurant.dto.BranchDTO;
 import com.mealbroker.restaurant.dto.MenuItemDTO;
 import com.mealbroker.restaurant.exception.BranchNotFoundException;
@@ -46,14 +47,13 @@ public class BranchServiceImpl implements BranchService {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found with ID: " + restaurantId));
 
-        // Create new branch
+        // Create new branch using the correct constructor
         Branch branch = new Branch(
-                branchDTO.getBranchId(),
-                branchDTO.getRestaurantId(),
                 branchDTO.getBranchName(),
                 branchDTO.getLocation()
         );
-        branch.setRestaurantId(restaurant.getRestaurantId());
+
+        branch.setRestaurant(restaurant);
         branch.setActive(branchDTO.isActive());
 
         // Save the branch

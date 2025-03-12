@@ -1,5 +1,7 @@
 package com.mealbroker.broker.exception;
 
+import com.mealbroker.domain.error.ErrorResponse;
+import com.mealbroker.domain.error.ValidationErrorResponse;
 import feign.FeignException;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import org.springframework.http.HttpStatus;
@@ -14,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Global exception handler for broker service
+ * Global exception handler for broker service using domain-model error classes
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {

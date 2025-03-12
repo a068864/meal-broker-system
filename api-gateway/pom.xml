@@ -87,6 +87,10 @@
             <artifactId>reactor-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.mealbroker</groupId>
+            <artifactId>domain-model</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

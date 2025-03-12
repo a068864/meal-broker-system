@@ -1,5 +1,8 @@
 package com.mealbroker.exception;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mealbroker.domain.error.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
@@ -15,15 +18,17 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 
 /**
- * Global error handler for the API Gateway
+ * Global error handler for the API Gateway using domain-model error classes
  */
 @Component
 @Order(-1)
 public class GlobalErrorHandler implements ErrorWebExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalErrorHandler.class);
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
@@ -49,13 +54,31 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
         response.setStatusCode(status);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-        // Create simple error JSON
-        String errorJson = "{\"status\":" + status.value() +
-                ",\"message\":\"" + message + "\"}";
+        // Create error response using domain model class
+        ErrorResponse errorResponse = new ErrorResponse(
+                status.value(),
+                message,
+                LocalDateTime.now()
+        );
 
-        DataBuffer buffer = response.bufferFactory()
-                .wrap(errorJson.getBytes(StandardCharsets.UTF_8));
+        try {
+            // Convert error response to JSON
+            String errorJson = objectMapper.writeValueAsString(errorResponse);
+            DataBuffer buffer = response.bufferFactory()
+                    .wrap(errorJson.getBytes(StandardCharsets.UTF_8));
 
-        return response.writeWith(Mono.just(buffer));
+            return response.writeWith(Mono.just(buffer));
+        } catch (JsonProcessingException jpe) {
+            logger.error("Error writing error response", jpe);
+
+            // Fallback to simple error message if JSON processing fails
+            String fallbackError = "{\"status\":" + status.value() +
+                    ",\"message\":\"" + message + "\"}";
+
+            DataBuffer buffer = response.bufferFactory()
+                    .wrap(fallbackError.getBytes(StandardCharsets.UTF_8));
+
+            return response.writeWith(Mono.just(buffer));
+        }
     }
 }

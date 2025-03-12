@@ -1,5 +1,7 @@
 package com.mealbroker.restaurant.exception;
 
+import com.mealbroker.domain.error.ErrorResponse;
+import com.mealbroker.domain.error.ValidationErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -12,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Global exception handler for restaurant service
+ * Global exception handler for restaurant service using domain-model error classes
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
