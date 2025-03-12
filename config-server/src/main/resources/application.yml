@@ -1,0 +1,17 @@
+  // Update in config-server/src/main/resources/application.yml
+    // Replace the credentials section with environment variables
+
+  spring:
+    application:
+      name: config-server
+    profiles:
+      active: native
+    cloud:
+      config:
+        server:
+          native:
+            search-locations: classpath:/config
+    security:
+      user:
+        name: ${CONFIG_SERVER_USERNAME:configuser}
+        password: ${CONFIG_SERVER_PASSWORD:configpassword}
