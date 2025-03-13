@@ -144,7 +144,7 @@ public class Order {
      * @throws IllegalStateException if the status transition is invalid
      */
     public void setStatus(OrderStatus newStatus) {
-        if (status == null) {
+        if (status == null || status == OrderStatus.NEW) {
             status = newStatus;
             return;
         }

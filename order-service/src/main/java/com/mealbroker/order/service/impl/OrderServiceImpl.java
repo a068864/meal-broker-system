@@ -56,7 +56,6 @@ public class OrderServiceImpl implements OrderService {
         order.setRestaurant(restaurant);
         order.setBranch(branch);
         order.setOrderTime(orderDTO.getOrderTime() != null ? orderDTO.getOrderTime() : new Date());
-        order.setStatus(orderDTO.getStatus() != null ? orderDTO.getStatus() : OrderStatus.NEW);
         order.setCustomerLocation(orderDTO.getCustomerLocation());
 
         // Save the order first to get an ID
@@ -187,15 +186,15 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderDTO updateOrderStatus(Long orderId, OrderStatus status) {
+    public OrderDTO updateOrderStatus(Long orderId, OrderStatus newStatus) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + orderId));
 
         // Validate status transition
-        validateStatusTransition(order.getStatus(), status);
+        validateStatusTransition(order.getStatus(), newStatus);
 
         // Update status
-        order.setStatus(status);
+        order.setStatus(newStatus);
         Order updatedOrder = orderRepository.save(order);
 
         return convertToDTO(updatedOrder);
