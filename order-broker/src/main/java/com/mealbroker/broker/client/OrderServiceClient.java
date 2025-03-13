@@ -1,8 +1,8 @@
 package com.mealbroker.broker.client;
 
-import com.mealbroker.broker.dto.OrderCreateRequestDTO;
-import com.mealbroker.broker.dto.OrderResponseDTO;
 import com.mealbroker.domain.OrderStatus;
+import com.mealbroker.domain.dto.OrderCreateRequestDTO;
+import com.mealbroker.domain.dto.OrderResponseDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 

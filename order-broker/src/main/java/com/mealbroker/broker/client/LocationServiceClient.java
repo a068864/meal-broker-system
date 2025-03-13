@@ -1,11 +1,11 @@
 package com.mealbroker.broker.client;
 
-import com.mealbroker.broker.dto.LocationRequestDTO;
-import com.mealbroker.broker.dto.NearbyBranchesRequestDTO;
-import com.mealbroker.broker.dto.NearestBranchRequestDTO;
-import com.mealbroker.broker.dto.RouteRequestDTO;
 import com.mealbroker.domain.Branch;
 import com.mealbroker.domain.Location;
+import com.mealbroker.domain.dto.LocationRequestDTO;
+import com.mealbroker.domain.dto.NearbyBranchesRequestDTO;
+import com.mealbroker.domain.dto.NearestBranchRequestDTO;
+import com.mealbroker.domain.dto.RouteRequestDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;

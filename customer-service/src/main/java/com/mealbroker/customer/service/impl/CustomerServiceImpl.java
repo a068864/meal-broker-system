@@ -1,12 +1,12 @@
 package com.mealbroker.customer.service.impl;
 
-import com.mealbroker.customer.dto.CustomerDTO;
 import com.mealbroker.customer.exception.CustomerNotFoundException;
 import com.mealbroker.customer.exception.EmailAlreadyExistsException;
 import com.mealbroker.customer.repository.CustomerRepository;
 import com.mealbroker.customer.service.CustomerService;
 import com.mealbroker.domain.Customer;
 import com.mealbroker.domain.Location;
+import com.mealbroker.domain.dto.CustomerDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

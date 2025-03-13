@@ -2,8 +2,8 @@ package com.mealbroker.order.service;
 
 import com.mealbroker.domain.Location;
 import com.mealbroker.domain.OrderStatus;
-import com.mealbroker.order.dto.OrderDTO;
-import com.mealbroker.order.dto.OrderItemDTO;
+import com.mealbroker.domain.dto.OrderDTO;
+import com.mealbroker.domain.dto.OrderItemDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;

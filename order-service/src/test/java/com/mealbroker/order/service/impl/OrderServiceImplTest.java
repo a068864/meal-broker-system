@@ -1,8 +1,8 @@
 package com.mealbroker.order.service.impl;
 
 import com.mealbroker.domain.*;
-import com.mealbroker.order.dto.OrderDTO;
-import com.mealbroker.order.dto.OrderItemDTO;
+import com.mealbroker.domain.dto.OrderDTO;
+import com.mealbroker.domain.dto.OrderItemDTO;
 import com.mealbroker.order.exception.OrderNotFoundException;
 import com.mealbroker.order.repository.OrderItemRepository;
 import com.mealbroker.order.repository.OrderRepository;

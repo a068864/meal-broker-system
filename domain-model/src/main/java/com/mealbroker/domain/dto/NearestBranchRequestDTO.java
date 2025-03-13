@@ -1,4 +1,4 @@
-package com.mealbroker.broker.dto;
+package com.mealbroker.domain.dto;
 
 import com.mealbroker.domain.Branch;
 import com.mealbroker.domain.Location;

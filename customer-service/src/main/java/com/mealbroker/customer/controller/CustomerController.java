@@ -1,8 +1,8 @@
 package com.mealbroker.customer.controller;
 
-import com.mealbroker.customer.dto.CustomerDTO;
 import com.mealbroker.customer.service.CustomerService;
 import com.mealbroker.domain.Location;
+import com.mealbroker.domain.dto.CustomerDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

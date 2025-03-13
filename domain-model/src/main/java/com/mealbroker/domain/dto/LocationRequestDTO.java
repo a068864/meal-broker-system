@@ -1,4 +1,4 @@
-package com.mealbroker.broker.dto;
+package com.mealbroker.domain.dto;
 
 import com.mealbroker.domain.Location;
 import jakarta.validation.constraints.NotNull;

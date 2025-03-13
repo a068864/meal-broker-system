@@ -1,17 +1,21 @@
-package com.mealbroker.broker.dto;
+package com.mealbroker.domain.dto;
 
 import com.mealbroker.domain.Location;
+import com.mealbroker.domain.OrderStatus;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
- * Data Transfer Object for order creation requests sent to the Order Service
+ * Data Transfer Object for Order entities
  */
-public class OrderCreateRequestDTO {
+public class OrderDTO {
+
+    private Long orderId;
 
     @NotNull(message = "Customer ID is required")
     private Long customerId;
@@ -19,30 +23,41 @@ public class OrderCreateRequestDTO {
     @NotNull(message = "Restaurant ID is required")
     private Long restaurantId;
 
-    @NotNull(message = "Branch ID is required")
     private Long branchId;
 
     @NotEmpty(message = "Order must contain at least one item")
     @Valid
-    private List<MenuItemDTO> items = new ArrayList<>();
+    private List<OrderItemDTO> items = new ArrayList<>();
 
-    @NotNull(message = "Customer location is required")
+    private Date orderTime;
+
+    private OrderStatus status;
+
     private Location customerLocation;
 
+    private Double totalAmount;
+
     // Constructors
-    public OrderCreateRequestDTO() {
+    public OrderDTO() {
+        this.orderTime = new Date();
+        this.status = OrderStatus.NEW;
     }
 
-    public OrderCreateRequestDTO(Long customerId, Long restaurantId, Long branchId,
-                                 List<MenuItemDTO> items, Location customerLocation) {
+    public OrderDTO(Long customerId, Long restaurantId) {
+        this();
         this.customerId = customerId;
         this.restaurantId = restaurantId;
-        this.branchId = branchId;
-        this.items = items;
-        this.customerLocation = customerLocation;
     }
 
     // Getters and Setters
+    public Long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
+    }
+
     public Long getCustomerId() {
         return customerId;
     }
@@ -67,12 +82,28 @@ public class OrderCreateRequestDTO {
         this.branchId = branchId;
     }
 
-    public List<MenuItemDTO> getItems() {
+    public List<OrderItemDTO> getItems() {
         return items;
     }
 
-    public void setItems(List<MenuItemDTO> items) {
+    public void setItems(List<OrderItemDTO> items) {
         this.items = items;
+    }
+
+    public Date getOrderTime() {
+        return orderTime;
+    }
+
+    public void setOrderTime(Date orderTime) {
+        this.orderTime = orderTime;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
     }
 
     public Location getCustomerLocation() {
@@ -81,5 +112,13 @@ public class OrderCreateRequestDTO {
 
     public void setCustomerLocation(Location customerLocation) {
         this.customerLocation = customerLocation;
+    }
+
+    public Double getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(Double totalAmount) {
+        this.totalAmount = totalAmount;
     }
 }

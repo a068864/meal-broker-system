@@ -1,4 +1,4 @@
-package com.mealbroker.order.dto;
+package com.mealbroker.domain.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

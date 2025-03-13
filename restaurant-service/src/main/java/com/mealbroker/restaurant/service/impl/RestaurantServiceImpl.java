@@ -1,8 +1,8 @@
 package com.mealbroker.restaurant.service.impl;
 
 import com.mealbroker.domain.Restaurant;
-import com.mealbroker.restaurant.dto.BranchDTO;
-import com.mealbroker.restaurant.dto.RestaurantDTO;
+import com.mealbroker.domain.dto.BranchDTO;
+import com.mealbroker.domain.dto.RestaurantDTO;
 import com.mealbroker.restaurant.exception.RestaurantNotFoundException;
 import com.mealbroker.restaurant.repository.RestaurantRepository;
 import com.mealbroker.restaurant.service.BranchService;

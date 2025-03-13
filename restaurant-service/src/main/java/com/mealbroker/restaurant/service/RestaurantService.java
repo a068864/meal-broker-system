@@ -1,6 +1,6 @@
 package com.mealbroker.restaurant.service;
 
-import com.mealbroker.restaurant.dto.RestaurantDTO;
+import com.mealbroker.domain.dto.RestaurantDTO;
 
 import java.util.List;
 

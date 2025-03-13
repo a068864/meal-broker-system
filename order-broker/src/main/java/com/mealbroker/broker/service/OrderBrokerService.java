@@ -1,8 +1,8 @@
 package com.mealbroker.broker.service;
 
-import com.mealbroker.broker.dto.OrderRequestDTO;
-import com.mealbroker.broker.dto.OrderResponseDTO;
 import com.mealbroker.domain.OrderStatus;
+import com.mealbroker.domain.dto.OrderRequestDTO;
+import com.mealbroker.domain.dto.OrderResponseDTO;
 
 /**
  * Service interface for order broker operations

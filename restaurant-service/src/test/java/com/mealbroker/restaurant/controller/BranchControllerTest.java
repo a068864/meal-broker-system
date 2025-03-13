@@ -2,8 +2,8 @@ package com.mealbroker.restaurant.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mealbroker.domain.Location;
-import com.mealbroker.restaurant.dto.BranchDTO;
-import com.mealbroker.restaurant.dto.MenuItemDTO;
+import com.mealbroker.domain.dto.BranchDTO;
+import com.mealbroker.domain.dto.MenuItemDTO;
 import com.mealbroker.restaurant.exception.BranchNotFoundException;
 import com.mealbroker.restaurant.exception.RestaurantNotFoundException;
 import com.mealbroker.restaurant.service.BranchService;

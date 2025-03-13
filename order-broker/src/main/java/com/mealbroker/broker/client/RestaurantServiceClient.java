@@ -1,7 +1,7 @@
 package com.mealbroker.broker.client;
 
-import com.mealbroker.broker.dto.MenuItemDTO;
 import com.mealbroker.domain.Branch;
+import com.mealbroker.domain.dto.MenuItemDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

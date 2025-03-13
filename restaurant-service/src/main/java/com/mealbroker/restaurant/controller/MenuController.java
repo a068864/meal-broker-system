@@ -1,7 +1,7 @@
 package com.mealbroker.restaurant.controller;
 
-import com.mealbroker.restaurant.dto.MenuDTO;
-import com.mealbroker.restaurant.dto.MenuItemDTO;
+import com.mealbroker.domain.dto.MenuDTO;
+import com.mealbroker.domain.dto.MenuItemDTO;
 import com.mealbroker.restaurant.service.MenuService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

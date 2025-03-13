@@ -1,7 +1,7 @@
 package com.mealbroker.restaurant.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mealbroker.restaurant.dto.RestaurantDTO;
+import com.mealbroker.domain.dto.RestaurantDTO;
 import com.mealbroker.restaurant.exception.RestaurantNotFoundException;
 import com.mealbroker.restaurant.service.RestaurantService;
 import org.junit.jupiter.api.BeforeEach;

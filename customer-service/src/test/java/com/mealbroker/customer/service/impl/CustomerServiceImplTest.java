@@ -1,11 +1,11 @@
 package com.mealbroker.customer.service.impl;
 
-import com.mealbroker.customer.dto.CustomerDTO;
 import com.mealbroker.customer.exception.CustomerNotFoundException;
 import com.mealbroker.customer.exception.EmailAlreadyExistsException;
 import com.mealbroker.customer.repository.CustomerRepository;
 import com.mealbroker.domain.Customer;
 import com.mealbroker.domain.Location;
+import com.mealbroker.domain.dto.CustomerDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

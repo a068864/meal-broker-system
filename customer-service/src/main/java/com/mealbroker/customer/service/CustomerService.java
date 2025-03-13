@@ -1,7 +1,7 @@
 package com.mealbroker.customer.service;
 
-import com.mealbroker.customer.dto.CustomerDTO;
 import com.mealbroker.domain.Location;
+import com.mealbroker.domain.dto.CustomerDTO;
 
 import java.util.List;
 

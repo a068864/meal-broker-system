@@ -1,4 +1,4 @@
-package com.mealbroker.restaurant.dto;
+package com.mealbroker.domain.dto;
 
 import com.mealbroker.domain.Location;
 import jakarta.validation.Valid;

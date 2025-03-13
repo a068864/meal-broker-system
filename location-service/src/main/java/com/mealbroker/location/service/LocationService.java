@@ -2,7 +2,7 @@ package com.mealbroker.location.service;
 
 import com.mealbroker.domain.Branch;
 import com.mealbroker.domain.Location;
-import com.mealbroker.location.dto.NearestBranchRequestDTO;
+import com.mealbroker.domain.dto.NearestBranchRequestDTO;
 
 import java.util.List;
 

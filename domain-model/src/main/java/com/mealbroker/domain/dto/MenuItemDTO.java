@@ -1,4 +1,4 @@
-package com.mealbroker.broker.dto;
+package com.mealbroker.domain.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -23,6 +23,14 @@ public class MenuItemDTO {
 
     private List<String> specialInstructions;
 
+    private String description;
+
+    private List<String> allergens;
+
+    private boolean available;
+
+    private int stock;
+
     // Constructors
     public MenuItemDTO() {
     }
@@ -30,6 +38,13 @@ public class MenuItemDTO {
     public MenuItemDTO(Long menuItemId, Integer quantity) {
         this.menuItemId = menuItemId;
         this.quantity = quantity;
+    }
+
+    public MenuItemDTO(Long menuItemId, String name, String description, double price) {
+        this.menuItemId = menuItemId;
+        this.name = name;
+        this.description = description;
+        this.price = price;
     }
 
     // Getters and Setters
@@ -71,5 +86,38 @@ public class MenuItemDTO {
 
     public void setSpecialInstructions(List<String> specialInstructions) {
         this.specialInstructions = specialInstructions;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<String> getAllergens() {
+        return allergens;
+    }
+
+    public void setAllergens(List<String> allergens) {
+        this.allergens = allergens;
+    }
+
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
     }
 }
