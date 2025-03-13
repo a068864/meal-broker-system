@@ -1,4 +1,4 @@
-package com.mealbroker.broker.dto;
+package com.mealbroker.location.dto;
 
 import com.mealbroker.domain.Branch;
 import com.mealbroker.domain.Location;
@@ -8,9 +8,9 @@ import jakarta.validation.constraints.Positive;
 import java.util.List;
 
 /**
- * Data Transfer Object for nearby branch requests
+ * Data Transfer Object for nearby branches requests
  */
-public class NearbyBranchRequestDTO {
+public class NearbyBranchesRequestDTO {
 
     @NotNull(message = "Customer location is required")
     private Location customerLocation;
@@ -22,10 +22,10 @@ public class NearbyBranchRequestDTO {
     private double maxDistanceKm = 10.0; // Default 10km radius
 
     // Constructors
-    public NearbyBranchRequestDTO() {
+    public NearbyBranchesRequestDTO() {
     }
 
-    public NearbyBranchRequestDTO(Location customerLocation, List<Branch> branches, double maxDistanceKm) {
+    public NearbyBranchesRequestDTO(Location customerLocation, List<Branch> branches, double maxDistanceKm) {
         this.customerLocation = customerLocation;
         this.branches = branches;
         this.maxDistanceKm = maxDistanceKm;

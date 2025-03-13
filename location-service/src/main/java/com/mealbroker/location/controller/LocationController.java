@@ -2,10 +2,7 @@ package com.mealbroker.location.controller;
 
 import com.mealbroker.domain.Branch;
 import com.mealbroker.domain.Location;
-import com.mealbroker.location.dto.LocationRequestDTO;
-import com.mealbroker.location.dto.NearbyBranchRequestDTO;
-import com.mealbroker.location.dto.NearbyRequestDTO;
-import com.mealbroker.location.dto.RouteRequestDTO;
+import com.mealbroker.location.dto.*;
 import com.mealbroker.location.service.LocationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,24 +33,11 @@ public class LocationController {
     }
 
     /**
-     * Find locations within a specified radius
-     */
-    @PostMapping("/nearby")
-    public List<Location> findNearbyLocations(@Valid @RequestBody NearbyRequestDTO requestDTO) {
-        return locationService.findNearbyLocations(
-                requestDTO.getCenter(),
-                requestDTO.getLocations(),
-                requestDTO.getRadiusKm());
-    }
-
-    /**
      * Find the nearest branch to a customer location
      */
     @PostMapping("/nearest-branch")
-    public Branch findNearestBranch(
-            @RequestParam Location customerLocation,
-            @RequestBody List<Branch> branches) {
-        return locationService.findNearestBranch(customerLocation, branches);
+    public Branch findNearestBranch(@Valid @RequestBody NearestBranchRequestDTO requestDTO) {
+        return locationService.findNearestBranch(requestDTO);
     }
 
     /**
@@ -61,7 +45,7 @@ public class LocationController {
      */
     @PostMapping("/nearby-branches")
     public List<Branch> findNearbyBranches(
-            @Valid @RequestBody NearbyBranchRequestDTO requestDTO) {
+            @Valid @RequestBody NearbyBranchesRequestDTO requestDTO) {
         return locationService.findNearbyBranches(
                 requestDTO.getBranches(),
                 requestDTO.getCustomerLocation(),

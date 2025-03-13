@@ -2,7 +2,7 @@ package com.mealbroker.broker.controller;
 
 import com.mealbroker.broker.client.LocationServiceClient;
 import com.mealbroker.broker.client.RestaurantServiceClient;
-import com.mealbroker.broker.dto.NearbyBranchRequestDTO;
+import com.mealbroker.broker.dto.NearbyBranchesRequestDTO;
 import com.mealbroker.broker.dto.OrderRequestDTO;
 import com.mealbroker.broker.dto.OrderResponseDTO;
 import com.mealbroker.broker.dto.OrderStatusUpdateDTO;
@@ -90,7 +90,7 @@ public class OrderBrokerController {
         }
 
         // Use location service to find nearby branches
-        NearbyBranchRequestDTO requestDTO = new NearbyBranchRequestDTO(
+        NearbyBranchesRequestDTO requestDTO = new NearbyBranchesRequestDTO(
                 customerLocation, branches, maxDistanceKm);
 
         List<Branch> nearbyBranches = locationServiceClient.findNearbyBranches(requestDTO);

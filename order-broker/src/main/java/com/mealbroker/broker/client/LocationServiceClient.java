@@ -1,9 +1,8 @@
-// order-broker/src/main/java/com/mealbroker/broker/client/LocationServiceClient.java
 package com.mealbroker.broker.client;
 
 import com.mealbroker.broker.dto.LocationRequestDTO;
-import com.mealbroker.broker.dto.NearbyBranchRequestDTO;
-import com.mealbroker.broker.dto.NearbyRequestDTO;
+import com.mealbroker.broker.dto.NearbyBranchesRequestDTO;
+import com.mealbroker.broker.dto.NearestBranchRequestDTO;
 import com.mealbroker.broker.dto.RouteRequestDTO;
 import com.mealbroker.domain.Branch;
 import com.mealbroker.domain.Location;
@@ -28,24 +27,25 @@ public interface LocationServiceClient {
     Double calculateDistance(@RequestBody LocationRequestDTO request);
 
     /**
-     * Find nearby locations within a specified radius
+     * Find the nearest branch from a list of branches (legacy method)
      */
-    @PostMapping("/api/locations/nearby")
-    List<Location> findNearbyLocations(@RequestBody NearbyRequestDTO request);
-
-    /**
-     * Find the nearest branch from a list of branches
-     */
-    @PostMapping("/api/locations/nearest-branch")
-    Branch findNearestBranch(
+    @PostMapping("/api/locations/nearest-branch-legacy")
+    @Deprecated
+    Branch findNearestBranchLegacy(
             @RequestParam Location customerLocation,
             @RequestBody List<Branch> branches);
+
+    /**
+     * Find the nearest branch using request DTO
+     */
+    @PostMapping("/api/locations/nearest-branch")
+    Branch findNearestBranch(@RequestBody NearestBranchRequestDTO requestDTO);
 
     /**
      * Find nearby branches based on customer location
      */
     @PostMapping("/api/locations/nearby-branches")
-    List<Branch> findNearbyBranches(@RequestBody NearbyBranchRequestDTO requestDTO);
+    List<Branch> findNearbyBranches(@RequestBody NearbyBranchesRequestDTO requestDTO);
 
     /**
      * Check if a location is within a specific radius

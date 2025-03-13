@@ -1,8 +1,8 @@
-// location-service/src/main/java/com/mealbroker/location/service/impl/LocationServiceImpl.java
 package com.mealbroker.location.service.impl;
 
 import com.mealbroker.domain.Branch;
 import com.mealbroker.domain.Location;
+import com.mealbroker.location.dto.NearestBranchRequestDTO;
 import com.mealbroker.location.service.LocationService;
 import org.springframework.stereotype.Service;
 
@@ -67,15 +67,27 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public Branch findNearestBranch(Location customerLocation, List<Branch> branches) {
-        if (customerLocation == null || branches == null || branches.isEmpty()) {
+    public Branch findNearestBranch(NearestBranchRequestDTO requestDTO) {
+        if (requestDTO == null || requestDTO.getCustomerLocation() == null ||
+                requestDTO.getBranches() == null || requestDTO.getBranches().isEmpty()) {
             return null;
         }
 
-        return branches.stream()
-                .filter(Branch::isActive) // Consider only active branches
+        // Filter branches if activeOnly is true
+        List<Branch> filteredBranches = requestDTO.getBranches();
+        if (requestDTO.isActiveOnly()) {
+            filteredBranches = filteredBranches.stream()
+                    .filter(Branch::isActive)
+                    .collect(Collectors.toList());
+
+            if (filteredBranches.isEmpty()) {
+                return null;
+            }
+        }
+
+        return filteredBranches.stream()
                 .min(Comparator.comparingDouble(branch ->
-                        calculateDistance(customerLocation, branch.getLocation())))
+                        calculateDistance(requestDTO.getCustomerLocation(), branch.getLocation())))
                 .orElse(null);
     }
 

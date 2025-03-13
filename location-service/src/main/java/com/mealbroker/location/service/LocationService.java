@@ -2,6 +2,7 @@ package com.mealbroker.location.service;
 
 import com.mealbroker.domain.Branch;
 import com.mealbroker.domain.Location;
+import com.mealbroker.location.dto.NearestBranchRequestDTO;
 
 import java.util.List;
 
@@ -40,13 +41,12 @@ public interface LocationService {
     Location findNearestLocation(Location center, List<Location> locations);
 
     /**
-     * Find the nearest branch from a list of branches
+     * Find the nearest branch using request DTO
      *
-     * @param customerLocation the customer's location
-     * @param branches         list of restaurant branches
-     * @return the nearest branch, or null if the list is empty
+     * @param requestDTO containing customer location, branches list, and filtering options
+     * @return the nearest branch, or null if no valid branch is found
      */
-    Branch findNearestBranch(Location customerLocation, List<Branch> branches);
+    Branch findNearestBranch(NearestBranchRequestDTO requestDTO);
 
     /**
      * Find nearby branches for a restaurant based on customer location

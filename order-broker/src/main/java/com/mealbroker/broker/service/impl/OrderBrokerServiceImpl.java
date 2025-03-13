@@ -155,40 +155,8 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
      * @return the nearest branch
      */
     private Branch findNearestBranch(List<Branch> branches, Location customerLocation) {
-        if (branches.size() == 1) {
-            return branches.get(0);
-        }
 
-        // Create a list of branch locations
-        List<Location> branchLocations = branches.stream()
-                .map(Branch::getLocation)
-                .toList();
-
-        // Use location service to find nearby branches
-        NearbyRequestDTO nearbyRequest = new NearbyRequestDTO(
-                customerLocation,
-                branchLocations,
-                5000.0  // 5km radius coverage by default
-        );
-
-        // Get nearby branches
-        List<Location> nearbyLocations = locationServiceClient.findNearbyLocations(nearbyRequest);
-
-        if (nearbyLocations.isEmpty()) {
-            // If no branches within the radius, find the closest overall
-            Optional<Branch> closestBranch = branches.stream()
-                    .min(Comparator.comparingDouble(branch ->
-                            calculateDistance(customerLocation, branch.getLocation())));
-
-            return closestBranch.orElse(branches.get(0));
-        } else {
-            // Find the branch that matches the first nearby location
-            Location nearestLocation = nearbyLocations.get(0);
-            return branches.stream()
-                    .filter(branch -> locationEquals(branch.getLocation(), nearestLocation))
-                    .findFirst()
-                    .orElse(branches.get(0));
-        }
+        return new Branch();
     }
 
     /**
