@@ -4,7 +4,6 @@ import com.mealbroker.domain.*;
 import com.mealbroker.order.dto.OrderDTO;
 import com.mealbroker.order.dto.OrderItemDTO;
 import com.mealbroker.order.exception.OrderNotFoundException;
-import com.mealbroker.order.exception.OrderStatusException;
 import com.mealbroker.order.repository.OrderItemRepository;
 import com.mealbroker.order.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,10 +16,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class OrderServiceImplTest {
