@@ -89,7 +89,7 @@ public class LocationServiceImpl implements LocationService {
         final double MAX_DISTANCE_THRESHOLD = 100.0;
 
         CityLocation nearestCity = null;
-        double minDistance  = Double.MAX_VALUE;
+        double minDistance = Double.MAX_VALUE;
         for (CityLocation city : cities) {
             Location cityLocation = new Location(city.latitude, city.longitude);
             double distance = calculateDistance(cityLocation, location);
