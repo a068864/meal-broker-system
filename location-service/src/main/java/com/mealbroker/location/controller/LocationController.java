@@ -5,7 +5,10 @@ import com.mealbroker.domain.Location;
 import com.mealbroker.location.dto.*;
 import com.mealbroker.location.service.LocationService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +19,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/locations")
 public class LocationController {
+
+    private static final Logger logger = LoggerFactory.getLogger(LocationController.class);
 
     private final LocationService locationService;
 
@@ -29,6 +34,7 @@ public class LocationController {
      */
     @PostMapping("/distance")
     public Double calculateDistance(@Valid @RequestBody LocationRequestDTO requestDTO) {
+        logger.info("Calculating distance between: {} and {}", requestDTO.getOrigin(), requestDTO.getDestination());
         return locationService.calculateDistance(requestDTO.getOrigin(), requestDTO.getDestination());
     }
 
@@ -37,19 +43,33 @@ public class LocationController {
      */
     @PostMapping("/nearest-branch")
     public Branch findNearestBranch(@Valid @RequestBody NearestBranchRequestDTO requestDTO) {
-        return locationService.findNearestBranch(requestDTO);
+        logger.info("Finding nearest branch from {} branches",
+                requestDTO.getBranches() != null ? requestDTO.getBranches().size() : 0);
+
+        Branch nearestBranch = locationService.findNearestBranch(requestDTO);
+        if (nearestBranch == null) {
+            // Log the issue but return null so the client can handle it appropriately
+            logger.warn("No suitable branch found for customer location: {}", requestDTO.getCustomerLocation());
+        } else {
+            logger.info("Found nearest branch: {} with ID: {}", nearestBranch.getBranchName(), nearestBranch.getBranchId());
+        }
+        return nearestBranch;
     }
 
     /**
      * Find nearby branches based on customer location
      */
     @PostMapping("/nearby-branches")
-    public List<Branch> findNearbyBranches(
-            @Valid @RequestBody NearbyBranchesRequestDTO requestDTO) {
-        return locationService.findNearbyBranches(
+    public List<Branch> findNearbyBranches(@Valid @RequestBody NearbyBranchesRequestDTO requestDTO) {
+        logger.info("Finding nearby branches within {} km", requestDTO.getMaxDistanceKm());
+
+        List<Branch> nearbyBranches = locationService.findNearbyBranches(
                 requestDTO.getBranches(),
                 requestDTO.getCustomerLocation(),
                 requestDTO.getMaxDistanceKm());
+
+        logger.info("Found {} nearby branches", nearbyBranches.size());
+        return nearbyBranches;
     }
 
     /**
@@ -57,10 +77,13 @@ public class LocationController {
      */
     @PostMapping("/within-radius")
     public boolean isWithinRadius(
-            @RequestParam Location center,
-            @RequestParam Location location,
-            @RequestParam double radiusKm) {
-        return locationService.isWithinRadius(center, location, radiusKm);
+            @RequestParam double radiusKm,
+            @Valid @RequestBody LocationRequestDTO requestDTO) {
+        logger.info("Checking if location is within {} km radius", radiusKm);
+        return locationService.isWithinRadius(
+                requestDTO.getOrigin(),
+                requestDTO.getDestination(),
+                radiusKm);
     }
 
     /**
@@ -68,6 +91,7 @@ public class LocationController {
      */
     @GetMapping("/geocode")
     public Location geocodeAddress(@RequestParam String address) {
+        logger.info("Geocoding address: {}", address);
         return locationService.geocodeAddress(address);
     }
 
@@ -76,6 +100,7 @@ public class LocationController {
      */
     @PostMapping("/reverse-geocode")
     public String reverseGeocode(@Valid @RequestBody Location location) {
+        logger.info("Reverse geocoding location: {}", location);
         return locationService.reverseGeocode(location);
     }
 
@@ -84,14 +109,16 @@ public class LocationController {
      */
     @PostMapping("/optimal-route")
     public List<Location> findOptimalRoute(@Valid @RequestBody RouteRequestDTO requestDTO) {
+        logger.info("Finding optimal route for {} destinations",
+                requestDTO.getDestinations() != null ? requestDTO.getDestinations().size() : 0);
         return locationService.findOptimalRoute(requestDTO.getOrigin(), requestDTO.getDestinations());
     }
 
     /**
-     * Simple health check endpoint
+     * Health check endpoint
      */
     @GetMapping("/health")
-    public String health() {
-        return "Location Service is up and running!";
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Location Service is up and running!");
     }
 }

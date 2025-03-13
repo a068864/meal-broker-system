@@ -18,14 +18,11 @@ import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Implementation of the OrderBrokerService interface
  * Acts as the central component in the Broker pattern
- * Simplified version without Payment and Notification services
  */
 @Service
 public class OrderBrokerServiceImpl implements OrderBrokerService {
@@ -57,6 +54,7 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
      * @param orderRequest the order request
      * @return the order response
      */
+    @Override
     @Transactional
     public OrderResponseDTO placeOrder(OrderRequestDTO orderRequest) {
         CircuitBreaker placeOrderCB = circuitBreakerFactory.create("placeOrder");
@@ -76,8 +74,9 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
             }
 
             // Find the nearest branch using the location service
-            Branch nearestBranch = locationServiceClient.findNearestBranch(
-                    orderRequest.getCustomerLocation(), branches);
+            NearestBranchRequestDTO nearestBranchRequest = new NearestBranchRequestDTO(
+                    orderRequest.getCustomerLocation(), branches, true);
+            Branch nearestBranch = locationServiceClient.findNearestBranch(nearestBranchRequest);
 
             if (nearestBranch == null) {
                 throw new BrokerException("Could not determine the nearest branch");
@@ -115,6 +114,7 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
      * @param status  the new status
      * @return the updated order
      */
+    @Override
     public OrderResponseDTO updateOrderStatus(Long orderId, OrderStatus status) {
         CircuitBreaker updateStatusCB = circuitBreakerFactory.create("updateOrderStatus");
 
@@ -134,6 +134,7 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
      * @param orderId the order ID
      * @return the cancelled order
      */
+    @Override
     public OrderResponseDTO cancelOrder(Long orderId) {
         CircuitBreaker cancelOrderCB = circuitBreakerFactory.create("cancelOrder");
 
@@ -148,30 +149,9 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
     }
 
     /**
-     * Find the nearest branch to the customer
-     *
-     * @param branches         all branches of the restaurant
-     * @param customerLocation the customer's location
-     * @return the nearest branch
-     */
-    private Branch findNearestBranch(List<Branch> branches, Location customerLocation) {
-
-        return new Branch();
-    }
-
-    /**
-     * Calculate distance between two locations (simplified)
+     * Calculate distance between two locations
      */
     private double calculateDistance(Location loc1, Location loc2) {
         return locationServiceClient.calculateDistance(new LocationRequestDTO(loc1, loc2));
-    }
-
-    /**
-     * Check if two locations are approximately equal
-     */
-    private boolean locationEquals(Location loc1, Location loc2) {
-        final double EPSILON = 0.0001;
-        return Math.abs(loc1.getLatitude() - loc2.getLatitude()) < EPSILON &&
-                Math.abs(loc1.getLongitude() - loc2.getLongitude()) < EPSILON;
     }
 }

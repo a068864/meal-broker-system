@@ -3,6 +3,7 @@ package com.mealbroker.location.service.impl;
 import com.mealbroker.domain.Branch;
 import com.mealbroker.domain.Location;
 import com.mealbroker.location.dto.NearestBranchRequestDTO;
+import com.mealbroker.location.exception.LocationServiceException;
 import com.mealbroker.location.service.LocationService;
 import org.springframework.stereotype.Service;
 
@@ -78,6 +79,21 @@ public class LocationServiceImpl implements LocationService {
         if (requestDTO.isActiveOnly()) {
             filteredBranches = filteredBranches.stream()
                     .filter(Branch::isActive)
+                    .filter(branch -> branch.getLocation() != null)
+                    .collect(Collectors.toList());
+
+            if (filteredBranches.isEmpty()) {
+                return null;
+            }
+        }
+
+        // Filter by maximum distance if specified
+        if (requestDTO.getMaxDistanceKm() > 0) {
+            final Location customerLocation = requestDTO.getCustomerLocation();
+            final double maxDistance = requestDTO.getMaxDistanceKm();
+
+            filteredBranches = filteredBranches.stream()
+                    .filter(branch -> isWithinRadius(customerLocation, branch.getLocation(), maxDistance))
                     .collect(Collectors.toList());
 
             if (filteredBranches.isEmpty()) {
@@ -100,6 +116,7 @@ public class LocationServiceImpl implements LocationService {
         // Filter by active status and distance
         return branches.stream()
                 .filter(Branch::isActive)
+                .filter(branch -> branch.getLocation() != null)
                 .filter(branch -> isWithinRadius(customerLocation, branch.getLocation(), maxDistance))
                 .sorted(Comparator.comparingDouble(branch ->
                         calculateDistance(customerLocation, branch.getLocation())))
@@ -116,7 +133,11 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public Location geocodeAddress(String address) {
-        // Implementation unchanged
+        if (address == null || address.trim().isEmpty()) {
+            throw new LocationServiceException("Address cannot be null or empty");
+        }
+
+        // Mock implementation for geocoding - in a real system this would call an external service
         switch (address.toLowerCase()) {
             case "toronto":
                 return new Location(43.6532, -79.3832);
@@ -135,14 +156,18 @@ public class LocationServiceImpl implements LocationService {
             case "winnipeg":
                 return new Location(49.8951, -97.1384);
             default:
-                // Default unknown addresses
+                // For unknown addresses, return a default location
                 return new Location(0.0, 0.0);
         }
     }
 
     @Override
     public String reverseGeocode(Location location) {
-        // Implementation unchanged
+        if (location == null) {
+            throw new LocationServiceException("Location cannot be null");
+        }
+
+        // Mock implementation for reverse geocoding
         List<CityLocation> cities = new ArrayList<>();
         cities.add(new CityLocation("Toronto", 43.6532, -79.3832));
         cities.add(new CityLocation("Vancouver", 49.2827, -123.1207));
@@ -165,7 +190,7 @@ public class LocationServiceImpl implements LocationService {
                 nearestCity = city;
             }
         }
-        if (minDistance > MAX_DISTANCE_THRESHOLD) {
+        if (nearestCity == null || minDistance > MAX_DISTANCE_THRESHOLD) {
             return "Unknown Location";
         }
         return nearestCity.name;
@@ -173,12 +198,20 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public List<Location> findOptimalRoute(Location start, List<Location> destinations) {
-        // Implementation unchanged
+        if (start == null || destinations == null) {
+            throw new LocationServiceException("Start location and destinations cannot be null");
+        }
+
+        // Simple implementation of Nearest Neighbor algorithm for route optimization
         List<Location> route = new ArrayList<>();
         route.add(start);
 
         // Filter out the starting location from destinations to avoid duplicates
         List<Location> remaining = new ArrayList<>(destinations);
+        remaining.removeIf(location ->
+                location.getLatitude().equals(start.getLatitude()) &&
+                        location.getLongitude().equals(start.getLongitude())
+        );
 
         Location current = start;
         while (!remaining.isEmpty()) {

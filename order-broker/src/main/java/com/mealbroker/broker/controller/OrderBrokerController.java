@@ -2,14 +2,13 @@ package com.mealbroker.broker.controller;
 
 import com.mealbroker.broker.client.LocationServiceClient;
 import com.mealbroker.broker.client.RestaurantServiceClient;
-import com.mealbroker.broker.dto.NearbyBranchesRequestDTO;
-import com.mealbroker.broker.dto.OrderRequestDTO;
-import com.mealbroker.broker.dto.OrderResponseDTO;
-import com.mealbroker.broker.dto.OrderStatusUpdateDTO;
+import com.mealbroker.broker.dto.*;
 import com.mealbroker.broker.service.OrderBrokerService;
 import com.mealbroker.domain.Branch;
 import com.mealbroker.domain.Location;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +16,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller for order broker operations (simplified)
+ * REST controller for order broker operations
  */
 @RestController
 @RequestMapping("/api/broker")
 public class OrderBrokerController {
+
+    private static final Logger logger = LoggerFactory.getLogger(OrderBrokerController.class);
 
     private final OrderBrokerService brokerService;
     private final RestaurantServiceClient restaurantServiceClient;
@@ -42,6 +43,8 @@ public class OrderBrokerController {
      */
     @PostMapping("/orders")
     public ResponseEntity<OrderResponseDTO> placeOrder(@Valid @RequestBody OrderRequestDTO orderRequest) {
+        logger.info("Received order request for customer ID: {} and restaurant ID: {}",
+                orderRequest.getCustomerId(), orderRequest.getRestaurantId());
         OrderResponseDTO response = brokerService.placeOrder(orderRequest);
         return ResponseEntity.ok(response);
     }
@@ -53,6 +56,7 @@ public class OrderBrokerController {
     public ResponseEntity<OrderResponseDTO> updateOrderStatus(
             @PathVariable Long orderId,
             @Valid @RequestBody OrderStatusUpdateDTO statusUpdate) {
+        logger.info("Updating order status: Order ID {} to status {}", orderId, statusUpdate.getStatus());
         OrderResponseDTO response = brokerService.updateOrderStatus(orderId, statusUpdate.getStatus());
         return ResponseEntity.ok(response);
     }
@@ -62,16 +66,9 @@ public class OrderBrokerController {
      */
     @PostMapping("/orders/{orderId}/cancel")
     public ResponseEntity<OrderResponseDTO> cancelOrder(@PathVariable Long orderId) {
+        logger.info("Cancelling order: Order ID {}", orderId);
         OrderResponseDTO response = brokerService.cancelOrder(orderId);
         return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Simple health check endpoint
-     */
-    @GetMapping("/health")
-    public ResponseEntity<String> health() {
-        return ResponseEntity.ok("Order Broker Service is up and running!");
     }
 
     /**
@@ -83,9 +80,12 @@ public class OrderBrokerController {
             @RequestBody Location customerLocation,
             @RequestParam(required = false, defaultValue = "10.0") double maxDistanceKm) {
 
+        logger.info("Finding nearby branches for restaurant ID: {} within {} km", restaurantId, maxDistanceKm);
+
         // Get all branches of the restaurant
         List<Branch> branches = restaurantServiceClient.getBranchesByRestaurant(restaurantId);
         if (branches.isEmpty()) {
+            logger.warn("No branches found for restaurant ID: {}", restaurantId);
             return ResponseEntity.noContent().build();
         }
 
@@ -94,6 +94,51 @@ public class OrderBrokerController {
                 customerLocation, branches, maxDistanceKm);
 
         List<Branch> nearbyBranches = locationServiceClient.findNearbyBranches(requestDTO);
+
+        if (nearbyBranches.isEmpty()) {
+            logger.info("No nearby branches found within {} km for restaurant ID: {}", maxDistanceKm, restaurantId);
+            return ResponseEntity.noContent().build();
+        }
+
+        logger.info("Found {} nearby branches for restaurant ID: {}", nearbyBranches.size(), restaurantId);
         return ResponseEntity.ok(nearbyBranches);
+    }
+
+    /**
+     * Find the nearest branch for a restaurant
+     */
+    @PostMapping("/nearest-branch")
+    public ResponseEntity<Branch> findNearestBranch(
+            @RequestParam Long restaurantId,
+            @RequestBody Location customerLocation) {
+
+        logger.info("Finding nearest branch for restaurant ID: {}", restaurantId);
+
+        // Get all branches of the restaurant
+        List<Branch> branches = restaurantServiceClient.getBranchesByRestaurant(restaurantId);
+        if (branches.isEmpty()) {
+            logger.warn("No branches found for restaurant ID: {}", restaurantId);
+            return ResponseEntity.noContent().build();
+        }
+
+        // Use location service to find the nearest branch
+        NearestBranchRequestDTO requestDTO = new NearestBranchRequestDTO(customerLocation, branches, true);
+        Branch nearestBranch = locationServiceClient.findNearestBranch(requestDTO);
+
+        if (nearestBranch == null) {
+            logger.info("No suitable branch found for restaurant ID: {}", restaurantId);
+            return ResponseEntity.noContent().build();
+        }
+
+        logger.info("Found nearest branch ID: {} for restaurant ID: {}", nearestBranch.getBranchId(), restaurantId);
+        return ResponseEntity.ok(nearestBranch);
+    }
+
+    /**
+     * Simple health check endpoint
+     */
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Order Broker Service is up and running!");
     }
 }
