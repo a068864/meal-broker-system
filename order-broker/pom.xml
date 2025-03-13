@@ -45,7 +45,7 @@
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
 
-        <!-- Resilience4j for circuit breaker -->
+        <!-- Resilience4j for circuit breaker and retry mechanism-->
         <dependency>
             <groupId>io.github.resilience4j</groupId>
             <artifactId>resilience4j-spring-boot3</artifactId>
@@ -57,6 +57,11 @@
         <dependency>
             <groupId>io.github.resilience4j</groupId>
             <artifactId>resilience4j-timelimiter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-retry</artifactId>
+            <version>${resilience4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>

@@ -10,6 +10,7 @@ import com.mealbroker.broker.service.OrderBrokerService;
 import com.mealbroker.domain.Branch;
 import com.mealbroker.domain.Location;
 import com.mealbroker.domain.OrderStatus;
+import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +57,7 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
      */
     @Override
     @Transactional
+    @Retry(name = "placeOrder", fallbackMethod = "placeOrder")
     public OrderResponseDTO placeOrder(OrderRequestDTO orderRequest) {
         CircuitBreaker placeOrderCB = circuitBreakerFactory.create("placeOrder");
 
@@ -115,6 +117,8 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
      * @return the updated order
      */
     @Override
+    @Transactional
+    @Retry(name = "updateOrderStatus", fallbackMethod = "updateOrderStatus")
     public OrderResponseDTO updateOrderStatus(Long orderId, OrderStatus status) {
         CircuitBreaker updateStatusCB = circuitBreakerFactory.create("updateOrderStatus");
 
@@ -135,6 +139,8 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
      * @return the cancelled order
      */
     @Override
+    @Transactional
+    @Retry(name = "cancelOrder", fallbackMethod = "cancelOrder")
     public OrderResponseDTO cancelOrder(Long orderId) {
         CircuitBreaker cancelOrderCB = circuitBreakerFactory.create("cancelOrder");
 
@@ -146,12 +152,5 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
                     errorResponse.setMessage("Failed to cancel order: " + throwable.getMessage());
                     return errorResponse;
                 });
-    }
-
-    /**
-     * Calculate distance between two locations
-     */
-    private double calculateDistance(Location loc1, Location loc2) {
-        return locationServiceClient.calculateDistance(new LocationRequestDTO(loc1, loc2));
     }
 }

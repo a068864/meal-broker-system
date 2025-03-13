@@ -17,8 +17,30 @@ eureka:
   instance:
     prefer-ip-address: true
 
-# Resilience4j Circuit Breaker configuration
+# Resilience4j configuration
 resilience4j:
+  retry:
+    instances:
+      placeOrder:
+        maxAttempts: 3
+        waitDuration: 1s
+        retryExceptions:
+          - org.springframework.web.client.ResourceAccessException
+          - java.util.concurrent.TimeoutException
+          - feign.FeignException.ServiceUnavailable
+          - feign.FeignException.GatewayTimeout
+        ignoreExceptions:
+          - com.mealbroker.broker.exception.BrokerException
+          - feign.FeignException.BadRequest
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+      locationService:
+        maxAttempts: 3
+        waitDuration: 500ms
+      restaurantService:
+        maxAttempts: 3
+        waitDuration: 500ms
+
   circuitbreaker:
     instances:
       placeOrder:
