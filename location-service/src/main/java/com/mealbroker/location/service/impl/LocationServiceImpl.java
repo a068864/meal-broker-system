@@ -129,7 +129,7 @@ public class LocationServiceImpl implements LocationService {
             throw new LocationServiceException("Address cannot be null or empty");
         }
 
-        // Mock implementation for geocoding - in a real system this would call an external service
+        // Mock implementation for geocoding
         switch (address.toLowerCase()) {
             case "toronto":
                 return new Location(43.6532, -79.3832);
