@@ -1,6 +1,5 @@
 package com.mealbroker.restaurant.service.impl;
 
-import com.mealbroker.domain.Branch;
 import com.mealbroker.domain.Location;
 import com.mealbroker.domain.Restaurant;
 import com.mealbroker.restaurant.dto.BranchDTO;
