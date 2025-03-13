@@ -1,6 +1,5 @@
 package com.mealbroker.restaurant.controller;
 
-import com.mealbroker.domain.Location;
 import com.mealbroker.restaurant.dto.BranchDTO;
 import com.mealbroker.restaurant.dto.MenuItemDTO;
 import com.mealbroker.restaurant.service.BranchService;
@@ -49,15 +48,6 @@ public class BranchController {
     @GetMapping("/{restaurantId}/branches/active")
     public ResponseEntity<List<BranchDTO>> getActiveBranchesByRestaurant(@PathVariable Long restaurantId) {
         List<BranchDTO> branches = branchService.getActiveBranchesByRestaurant(restaurantId);
-        return ResponseEntity.ok(branches);
-    }
-
-    @GetMapping("/{restaurantId}/branches/nearby")
-    public ResponseEntity<List<BranchDTO>> findNearbyBranches(
-            @PathVariable Long restaurantId,
-            @RequestBody Location location,
-            @RequestParam(defaultValue = "10.0") double maxDistance) {
-        List<BranchDTO> branches = branchService.findNearbyBranches(restaurantId, location, maxDistance);
         return ResponseEntity.ok(branches);
     }
 

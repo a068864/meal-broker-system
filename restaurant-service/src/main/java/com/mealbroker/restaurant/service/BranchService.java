@@ -1,6 +1,5 @@
 package com.mealbroker.restaurant.service;
 
-import com.mealbroker.domain.Location;
 import com.mealbroker.restaurant.dto.BranchDTO;
 import com.mealbroker.restaurant.dto.MenuItemDTO;
 
@@ -43,16 +42,6 @@ public interface BranchService {
      * @return list of active branches for the restaurant
      */
     List<BranchDTO> getActiveBranchesByRestaurant(Long restaurantId);
-
-    /**
-     * Find nearby branches for a restaurant
-     *
-     * @param restaurantId the restaurant ID
-     * @param location     the customer location
-     * @param maxDistance  the maximum distance in kilometers
-     * @return list of nearby branches
-     */
-    List<BranchDTO> findNearbyBranches(Long restaurantId, Location location, double maxDistance);
 
     /**
      * Update a branch

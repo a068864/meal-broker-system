@@ -75,8 +75,13 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
                 throw new BrokerException("No branches found for restaurant: " + orderRequest.getRestaurantId());
             }
 
-            // Find the nearest branch
-            Branch nearestBranch = findNearestBranch(branches, orderRequest.getCustomerLocation());
+            // Find the nearest branch using the location service
+            Branch nearestBranch = locationServiceClient.findNearestBranch(
+                    orderRequest.getCustomerLocation(), branches);
+
+            if (nearestBranch == null) {
+                throw new BrokerException("Could not determine the nearest branch");
+            }
 
             // Check item availability
             boolean itemsAvailable = restaurantServiceClient.checkItemsAvailability(

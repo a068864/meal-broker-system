@@ -1,11 +1,12 @@
 package com.mealbroker.location.service;
 
+import com.mealbroker.domain.Branch;
 import com.mealbroker.domain.Location;
 
 import java.util.List;
 
 /**
- * Service interface for location operations
+ * Service interface for all location operations
  */
 public interface LocationService {
 
@@ -28,6 +29,44 @@ public interface LocationService {
      * @return list of locations within the radius
      */
     List<Location> findNearbyLocations(Location center, List<Location> locations, double radiusKm);
+
+    /**
+     * Find the nearest location from a list of locations
+     *
+     * @param center    the reference location
+     * @param locations list of locations to check
+     * @return the nearest location, or null if the list is empty
+     */
+    Location findNearestLocation(Location center, List<Location> locations);
+
+    /**
+     * Find the nearest branch from a list of branches
+     *
+     * @param customerLocation the customer's location
+     * @param branches         list of restaurant branches
+     * @return the nearest branch, or null if the list is empty
+     */
+    Branch findNearestBranch(Location customerLocation, List<Branch> branches);
+
+    /**
+     * Find nearby branches for a restaurant based on customer location
+     *
+     * @param branches         list of all branches to consider
+     * @param customerLocation the customer location
+     * @param maxDistance      the maximum distance in kilometers
+     * @return list of nearby branches
+     */
+    List<Branch> findNearbyBranches(List<Branch> branches, Location customerLocation, double maxDistance);
+
+    /**
+     * Check if a location is within a specified radius of another location
+     *
+     * @param center   the center location
+     * @param location the location to check
+     * @param radiusKm the radius in kilometers
+     * @return true if the location is within the radius, false otherwise
+     */
+    boolean isWithinRadius(Location center, Location location, double radiusKm);
 
     /**
      * Geocode an address to get coordinates

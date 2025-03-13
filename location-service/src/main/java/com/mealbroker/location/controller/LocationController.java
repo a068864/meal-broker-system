@@ -1,7 +1,9 @@
 package com.mealbroker.location.controller;
 
+import com.mealbroker.domain.Branch;
 import com.mealbroker.domain.Location;
 import com.mealbroker.location.dto.LocationRequestDTO;
+import com.mealbroker.location.dto.NearbyBranchRequestDTO;
 import com.mealbroker.location.dto.NearbyRequestDTO;
 import com.mealbroker.location.dto.RouteRequestDTO;
 import com.mealbroker.location.service.LocationService;
@@ -27,9 +29,6 @@ public class LocationController {
 
     /**
      * Calculate distance between two locations
-     *
-     * @param requestDTO contains origin and destination locations
-     * @return distance in kilometers
      */
     @PostMapping("/distance")
     public Double calculateDistance(@Valid @RequestBody LocationRequestDTO requestDTO) {
@@ -38,9 +37,6 @@ public class LocationController {
 
     /**
      * Find locations within a specified radius
-     *
-     * @param requestDTO contains origin, locations to check, and radius
-     * @return list of locations within the radius
      */
     @PostMapping("/nearby")
     public List<Location> findNearbyLocations(@Valid @RequestBody NearbyRequestDTO requestDTO) {
@@ -51,10 +47,40 @@ public class LocationController {
     }
 
     /**
+     * Find the nearest branch to a customer location
+     */
+    @PostMapping("/nearest-branch")
+    public Branch findNearestBranch(
+            @RequestParam Location customerLocation,
+            @RequestBody List<Branch> branches) {
+        return locationService.findNearestBranch(customerLocation, branches);
+    }
+
+    /**
+     * Find nearby branches based on customer location
+     */
+    @PostMapping("/nearby-branches")
+    public List<Branch> findNearbyBranches(
+            @Valid @RequestBody NearbyBranchRequestDTO requestDTO) {
+        return locationService.findNearbyBranches(
+                requestDTO.getBranches(),
+                requestDTO.getCustomerLocation(),
+                requestDTO.getMaxDistanceKm());
+    }
+
+    /**
+     * Check if a location is within a specified radius
+     */
+    @PostMapping("/within-radius")
+    public boolean isWithinRadius(
+            @RequestParam Location center,
+            @RequestParam Location location,
+            @RequestParam double radiusKm) {
+        return locationService.isWithinRadius(center, location, radiusKm);
+    }
+
+    /**
      * Geocode an address to get coordinates
-     *
-     * @param address the address to geocode
-     * @return the location coordinates
      */
     @GetMapping("/geocode")
     public Location geocodeAddress(@RequestParam String address) {
@@ -63,9 +89,6 @@ public class LocationController {
 
     /**
      * Reverse geocode coordinates to get an address
-     *
-     * @param location the location to reverse geocode
-     * @return the address
      */
     @PostMapping("/reverse-geocode")
     public String reverseGeocode(@Valid @RequestBody Location location) {
@@ -74,9 +97,6 @@ public class LocationController {
 
     /**
      * Find the optimal route from origin to a set of destinations
-     *
-     * @param requestDTO contains origin and destinations
-     * @return ordered list of locations representing the optimal route
      */
     @PostMapping("/optimal-route")
     public List<Location> findOptimalRoute(@Valid @RequestBody RouteRequestDTO requestDTO) {
@@ -85,8 +105,6 @@ public class LocationController {
 
     /**
      * Simple health check endpoint
-     *
-     * @return health status
      */
     @GetMapping("/health")
     public String health() {

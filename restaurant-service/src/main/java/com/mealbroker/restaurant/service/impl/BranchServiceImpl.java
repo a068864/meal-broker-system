@@ -1,6 +1,9 @@
 package com.mealbroker.restaurant.service.impl;
 
-import com.mealbroker.domain.*;
+import com.mealbroker.domain.Branch;
+import com.mealbroker.domain.Menu;
+import com.mealbroker.domain.MenuItem;
+import com.mealbroker.domain.Restaurant;
 import com.mealbroker.restaurant.dto.BranchDTO;
 import com.mealbroker.restaurant.dto.MenuItemDTO;
 import com.mealbroker.restaurant.exception.BranchNotFoundException;
@@ -95,49 +98,6 @@ public class BranchServiceImpl implements BranchService {
         return branchRepository.findByRestaurantRestaurantIdAndActiveTrue(restaurantId).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<BranchDTO> findNearbyBranches(Long restaurantId, Location location, double maxDistance) {
-        List<Branch> branches = branchRepository.findByRestaurantRestaurantIdAndActiveTrue(restaurantId);
-        // Filter branches by distance using Haversine formula
-        List<Branch> nearbyBranches = branches.stream()
-                .filter(branch -> calculateHaversineDistance(
-                                location.getLatitude(), location.getLongitude(),
-                                branch.getLocation().getLatitude(), branch.getLocation().getLongitude()
-                        ) <= maxDistance
-                )
-                .toList();
-
-        // Convert to DTOs
-        return nearbyBranches.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Calculate distance between two points using the Haversine formula
-     *
-     * @return distance in kilometers
-     */
-    private double calculateHaversineDistance(double lat1, double lon1, double lat2, double lon2) {
-        // Earth's radius in kilometers
-        final double EARTH_RADIUS = 6371.0;
-
-        // Convert degrees to radians
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLon = Math.toRadians(lon2 - lon1);
-
-        // Haversine formula
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        // Calculate distance
-        return EARTH_RADIUS * c;
     }
 
     @Override

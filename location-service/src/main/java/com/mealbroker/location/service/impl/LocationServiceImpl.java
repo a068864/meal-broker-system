@@ -1,15 +1,18 @@
+// location-service/src/main/java/com/mealbroker/location/service/impl/LocationServiceImpl.java
 package com.mealbroker.location.service.impl;
 
+import com.mealbroker.domain.Branch;
 import com.mealbroker.domain.Location;
 import com.mealbroker.location.service.LocationService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * A toy implementation of LocationService using simple latitude and longitude calculations
+ * Implementation of LocationService using Haversine formula
  */
 @Service
 public class LocationServiceImpl implements LocationService {
@@ -19,6 +22,10 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public double calculateDistance(Location location1, Location location2) {
+        if (location1 == null || location2 == null) {
+            throw new IllegalArgumentException("Locations cannot be null");
+        }
+
         // Implementation of the Haversine formula to calculate distance between two points on Earth
         double lat1 = Math.toRadians(location1.getLatitude());
         double lon1 = Math.toRadians(location1.getLongitude());
@@ -39,14 +46,65 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public List<Location> findNearbyLocations(Location center, List<Location> locations, double radiusKm) {
+        if (center == null || locations == null) {
+            throw new IllegalArgumentException("Center and locations cannot be null");
+        }
+
         return locations.stream()
-                .filter(location -> calculateDistance(center, location) <= radiusKm)
+                .filter(location -> isWithinRadius(center, location, radiusKm))
                 .collect(Collectors.toList());
     }
 
     @Override
+    public Location findNearestLocation(Location center, List<Location> locations) {
+        if (center == null || locations == null || locations.isEmpty()) {
+            return null;
+        }
+
+        return locations.stream()
+                .min(Comparator.comparingDouble(location -> calculateDistance(center, location)))
+                .orElse(null);
+    }
+
+    @Override
+    public Branch findNearestBranch(Location customerLocation, List<Branch> branches) {
+        if (customerLocation == null || branches == null || branches.isEmpty()) {
+            return null;
+        }
+
+        return branches.stream()
+                .filter(Branch::isActive) // Consider only active branches
+                .min(Comparator.comparingDouble(branch ->
+                        calculateDistance(customerLocation, branch.getLocation())))
+                .orElse(null);
+    }
+
+    @Override
+    public List<Branch> findNearbyBranches(List<Branch> branches, Location customerLocation, double maxDistance) {
+        if (customerLocation == null || branches == null) {
+            throw new IllegalArgumentException("Customer location and branches cannot be null");
+        }
+
+        // Filter by active status and distance
+        return branches.stream()
+                .filter(Branch::isActive)
+                .filter(branch -> isWithinRadius(customerLocation, branch.getLocation(), maxDistance))
+                .sorted(Comparator.comparingDouble(branch ->
+                        calculateDistance(customerLocation, branch.getLocation())))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean isWithinRadius(Location center, Location location, double radiusKm) {
+        if (center == null || location == null) {
+            return false;
+        }
+        return calculateDistance(center, location) <= radiusKm;
+    }
+
+    @Override
     public Location geocodeAddress(String address) {
-        // In a real implementation, this would call the Google Map API
+        // Implementation unchanged
         switch (address.toLowerCase()) {
             case "toronto":
                 return new Location(43.6532, -79.3832);
@@ -72,9 +130,7 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public String reverseGeocode(Location location) {
-        // In a real implementation, this would call the Google Map API
-
-        // List of predefined cities with coordinates
+        // Implementation unchanged
         List<CityLocation> cities = new ArrayList<>();
         cities.add(new CityLocation("Toronto", 43.6532, -79.3832));
         cities.add(new CityLocation("Vancouver", 49.2827, -123.1207));
@@ -85,7 +141,6 @@ public class LocationServiceImpl implements LocationService {
         cities.add(new CityLocation("Quebec City", 46.8139, -71.2080));
         cities.add(new CityLocation("Winnipeg", 49.8951, -97.1384));
 
-        // Define a maximum distance threshold (in km) to consider a location as "known"
         final double MAX_DISTANCE_THRESHOLD = 100.0;
 
         CityLocation nearestCity = null;
@@ -106,8 +161,7 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public List<Location> findOptimalRoute(Location start, List<Location> destinations) {
-        // Not actually optimal (not solving TSP), but simple for demonstration purposes
-
+        // Implementation unchanged
         List<Location> route = new ArrayList<>();
         route.add(start);
 
@@ -117,18 +171,9 @@ public class LocationServiceImpl implements LocationService {
         Location current = start;
         while (!remaining.isEmpty()) {
             // Find nearest unvisited location
-            Location next = current;
-            double minDistance = Double.MAX_VALUE;
-            for (Location location : remaining) {
-                if (location.equals(current)) {
-                    continue;
-                }
-                double dist = calculateDistance(current, location);
-                if (dist <= minDistance) {
-                    minDistance = dist;
-                    next = location;
-                }
-            }
+            Location next = findNearestLocation(current, remaining);
+            if (next == null) break;
+
             remaining.remove(next);
             route.add(next);
             current = next;

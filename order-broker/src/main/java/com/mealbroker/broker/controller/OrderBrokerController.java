@@ -1,13 +1,20 @@
 package com.mealbroker.broker.controller;
 
+import com.mealbroker.broker.client.LocationServiceClient;
+import com.mealbroker.broker.client.RestaurantServiceClient;
+import com.mealbroker.broker.dto.NearbyBranchRequestDTO;
 import com.mealbroker.broker.dto.OrderRequestDTO;
 import com.mealbroker.broker.dto.OrderResponseDTO;
 import com.mealbroker.broker.dto.OrderStatusUpdateDTO;
 import com.mealbroker.broker.service.OrderBrokerService;
+import com.mealbroker.domain.Branch;
+import com.mealbroker.domain.Location;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * REST controller for order broker operations (simplified)
@@ -17,10 +24,17 @@ import org.springframework.web.bind.annotation.*;
 public class OrderBrokerController {
 
     private final OrderBrokerService brokerService;
+    private final RestaurantServiceClient restaurantServiceClient;
+    private final LocationServiceClient locationServiceClient;
 
     @Autowired
-    public OrderBrokerController(OrderBrokerService brokerService) {
+    public OrderBrokerController(
+            OrderBrokerService brokerService,
+            RestaurantServiceClient restaurantServiceClient,
+            LocationServiceClient locationServiceClient) {
         this.brokerService = brokerService;
+        this.restaurantServiceClient = restaurantServiceClient;
+        this.locationServiceClient = locationServiceClient;
     }
 
     /**
@@ -58,5 +72,28 @@ public class OrderBrokerController {
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("Order Broker Service is up and running!");
+    }
+
+    /**
+     * Find nearby branches for a restaurant
+     */
+    @PostMapping("/nearby-branches")
+    public ResponseEntity<List<Branch>> findNearbyBranches(
+            @RequestParam Long restaurantId,
+            @RequestBody Location customerLocation,
+            @RequestParam(required = false, defaultValue = "10.0") double maxDistanceKm) {
+
+        // Get all branches of the restaurant
+        List<Branch> branches = restaurantServiceClient.getBranchesByRestaurant(restaurantId);
+        if (branches.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        // Use location service to find nearby branches
+        NearbyBranchRequestDTO requestDTO = new NearbyBranchRequestDTO(
+                customerLocation, branches, maxDistanceKm);
+
+        List<Branch> nearbyBranches = locationServiceClient.findNearbyBranches(requestDTO);
+        return ResponseEntity.ok(nearbyBranches);
     }
 }
