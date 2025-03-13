@@ -59,16 +59,6 @@ public interface LocationService {
     List<Branch> findNearbyBranches(List<Branch> branches, Location customerLocation, double maxDistance);
 
     /**
-     * Check if a location is within a specified radius of another location
-     *
-     * @param center   the center location
-     * @param location the location to check
-     * @param radiusKm the radius in kilometers
-     * @return true if the location is within the radius, false otherwise
-     */
-    boolean isWithinRadius(Location center, Location location, double radiusKm);
-
-    /**
      * Geocode an address to get coordinates
      * (Toy implementation with mock data)
      *

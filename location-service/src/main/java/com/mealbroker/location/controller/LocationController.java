@@ -76,20 +76,6 @@ public class LocationController {
     }
 
     /**
-     * Check if a location is within a specified radius
-     */
-    @PostMapping("/within-radius")
-    public boolean isWithinRadius(
-            @RequestParam double radiusKm,
-            @Valid @RequestBody LocationRequestDTO requestDTO) {
-        logger.info("Checking if location is within {} km radius", radiusKm);
-        return locationService.isWithinRadius(
-                requestDTO.getOrigin(),
-                requestDTO.getDestination(),
-                radiusKm);
-    }
-
-    /**
      * Geocode an address to get coordinates
      */
     @GetMapping("/geocode")

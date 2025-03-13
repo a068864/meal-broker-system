@@ -27,15 +27,6 @@ public interface LocationServiceClient {
     Double calculateDistance(@RequestBody LocationRequestDTO request);
 
     /**
-     * Find the nearest branch from a list of branches (legacy method)
-     */
-    @PostMapping("/api/locations/nearest-branch-legacy")
-    @Deprecated
-    Branch findNearestBranchLegacy(
-            @RequestParam Location customerLocation,
-            @RequestBody List<Branch> branches);
-
-    /**
      * Find the nearest branch using request DTO
      */
     @PostMapping("/api/locations/nearest-branch")
@@ -46,15 +37,6 @@ public interface LocationServiceClient {
      */
     @PostMapping("/api/locations/nearby-branches")
     List<Branch> findNearbyBranches(@RequestBody NearbyBranchesRequestDTO requestDTO);
-
-    /**
-     * Check if a location is within a specific radius
-     */
-    @PostMapping("/api/locations/within-radius")
-    boolean isWithinRadius(
-            @RequestParam Location center,
-            @RequestParam Location location,
-            @RequestParam double radiusKm);
 
     /**
      * Geocode an address to get location coordinates

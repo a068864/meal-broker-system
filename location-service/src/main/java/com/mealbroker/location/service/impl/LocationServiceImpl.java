@@ -52,7 +52,7 @@ public class LocationServiceImpl implements LocationService {
         }
 
         return locations.stream()
-                .filter(location -> isWithinRadius(center, location, radiusKm))
+                .filter(location -> calculateDistance(center, location) <= radiusKm)
                 .collect(Collectors.toList());
     }
 
@@ -93,7 +93,7 @@ public class LocationServiceImpl implements LocationService {
             final double maxDistance = requestDTO.getMaxDistanceKm();
 
             filteredBranches = filteredBranches.stream()
-                    .filter(branch -> isWithinRadius(customerLocation, branch.getLocation(), maxDistance))
+                    .filter(branch -> calculateDistance(customerLocation, branch.getLocation()) <= maxDistance)
                     .collect(Collectors.toList());
 
             if (filteredBranches.isEmpty()) {
@@ -117,18 +117,10 @@ public class LocationServiceImpl implements LocationService {
         return branches.stream()
                 .filter(Branch::isActive)
                 .filter(branch -> branch.getLocation() != null)
-                .filter(branch -> isWithinRadius(customerLocation, branch.getLocation(), maxDistance))
+                .filter(branch -> calculateDistance(customerLocation, branch.getLocation()) <= maxDistance)
                 .sorted(Comparator.comparingDouble(branch ->
                         calculateDistance(customerLocation, branch.getLocation())))
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean isWithinRadius(Location center, Location location, double radiusKm) {
-        if (center == null || location == null) {
-            return false;
-        }
-        return calculateDistance(center, location) <= radiusKm;
     }
 
     @Override
