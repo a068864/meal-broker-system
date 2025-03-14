@@ -1,0 +1,229 @@
+version: '3.8'
+
+services:
+  # Service Registry (Eureka)
+  service-registry:
+    build: ./service-registry
+    container_name: service-registry
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - mealbroker-network
+
+  # Config Server
+  config-server:
+    build: ./config-server
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    environment:
+      - SPRING_PROFILES_ACTIVE=native
+      - CONFIG_SERVER_USERNAME=configuser
+      - CONFIG_SERVER_PASSWORD=configpassword
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    networks:
+      - mealbroker-network
+
+  # API Gateway
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - GATEWAY_USERNAME=admin
+      - GATEWAY_PASSWORD=admin123
+    depends_on:
+      - service-registry
+      - config-server
+    networks:
+      - mealbroker-network
+
+  # Location Service
+  location-service:
+    build: ./location-service
+    container_name: location-service
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+    depends_on:
+      - service-registry
+      - config-server
+    networks:
+      - mealbroker-network
+
+  # Restaurant Service Database
+  restaurant-db:
+    image: mysql:8.0
+    container_name: restaurant-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=restaurantdb
+      - MYSQL_USER=restaurant_user
+      - MYSQL_PASSWORD=restaurant_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - restaurant-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mealbroker-network
+
+  # Restaurant Service
+  restaurant-service:
+    build: ./restaurant-service
+    container_name: restaurant-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://restaurant-db:3306/restaurantdb
+      - SPRING_DATASOURCE_USERNAME=restaurant_user
+      - SPRING_DATASOURCE_PASSWORD=restaurant_pass
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQL8Dialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create
+    depends_on:
+      - service-registry
+      - config-server
+      - restaurant-db
+    networks:
+      - mealbroker-network
+
+  # Customer Service Database
+  customer-db:
+    image: mysql:8.0
+    container_name: customer-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=customerdb
+      - MYSQL_USER=customer_user
+      - MYSQL_PASSWORD=customer_pass
+    ports:
+      - "3307:3306"
+    volumes:
+      - customer-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mealbroker-network
+
+  # Customer Service
+  customer-service:
+    build: ./customer-service
+    container_name: customer-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://customer-db:3306/customerdb
+      - SPRING_DATASOURCE_USERNAME=customer_user
+      - SPRING_DATASOURCE_PASSWORD=customer_pass
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQL8Dialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create
+    depends_on:
+      - service-registry
+      - config-server
+      - customer-db
+    networks:
+      - mealbroker-network
+
+  # Order Service Database
+  order-db:
+    image: mysql:8.0
+    container_name: order-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=orderdb
+      - MYSQL_USER=order_user
+      - MYSQL_PASSWORD=order_pass
+    ports:
+      - "3308:3306"
+    volumes:
+      - order-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mealbroker-network
+
+  # Order Service
+  order-service:
+    build: ./order-service
+    container_name: order-service
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://order-db:3306/orderdb
+      - SPRING_DATASOURCE_USERNAME=order_user
+      - SPRING_DATASOURCE_PASSWORD=order_pass
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQL8Dialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create
+    depends_on:
+      - service-registry
+      - config-server
+      - order-db
+      - customer-service
+      - restaurant-service
+    networks:
+      - mealbroker-network
+
+  # Order Broker
+  order-broker:
+    build: ./order-broker
+    container_name: order-broker
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+    depends_on:
+      - service-registry
+      - config-server
+      - customer-service
+      - restaurant-service
+      - order-service
+      - location-service
+    networks:
+      - mealbroker-network
+
+networks:
+  mealbroker-network:
+    driver: bridge
+
+volumes:
+  restaurant-db-data:
+  customer-db-data:
+  order-db-data:

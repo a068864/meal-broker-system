@@ -48,8 +48,8 @@ spring:
         - AddResponseHeader=X-Application-Version, 1.0.0
   security:
     user:
-          name: ${GATEWAY_USERNAME:admin}
-          password: ${GATEWAY_PASSWORD:admin123}
+      name: ${GATEWAY_USERNAME:admin}
+      password: ${GATEWAY_PASSWORD:admin123}
 
 # Eureka Client configuration
 eureka:

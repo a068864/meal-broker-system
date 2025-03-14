@@ -39,7 +39,8 @@ public class SecurityConfig {
                         // Secure all other endpoints
                         .anyExchange().authenticated()
                 )
-                .httpBasic(httpBasic -> {})
+                .httpBasic(httpBasic -> {
+                })
                 .build();
     }
 

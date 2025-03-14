@@ -31,7 +31,7 @@ services:
     networks:
       - mealbroker-network
 
-# API Gateway
+  # API Gateway
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
