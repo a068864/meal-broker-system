@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Simplified security configuration for the API Gateway
+ * Simple security configuration for the API Gateway
  */
 @Configuration
 @EnableWebFluxSecurity
