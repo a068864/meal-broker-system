@@ -11,4 +11,5 @@ COPY target/service-registry-1.0.0-SNAPSHOT.jar /app/service-registry.jar
 EXPOSE 8761
 
 # Command to run the application
-ENTRYPOINT ["java", "-jar", "service-registry.jar"]
+# ENTRYPOINT ["java", "-jar", "service-registry.jar"]
+ENTRYPOINT ["java", "-Xmx512m", "-jar", "service-registry.jar"]
