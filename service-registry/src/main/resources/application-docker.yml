@@ -4,12 +4,11 @@ server:
 spring:
   application:
     name: service-registry
-  profiles:
-    active: default
 
 eureka:
   instance:
-    hostname: localhost
+    hostname: service-registry
+    preferIpAddress: true
   client:
     registerWithEureka: false
     fetchRegistry: false
@@ -17,7 +16,10 @@ eureka:
       defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
   server:
     enableSelfPreservation: false
+    waitTimeInMsWhenSyncEmpty: 0
+    response-cache-update-interval-ms: 5000
 
+# Management endpoints for health checks
 management:
   endpoints:
     web:
@@ -26,3 +28,10 @@ management:
   endpoint:
     health:
       show-details: always
+
+# Enable more detailed logging for troubleshooting
+logging:
+  level:
+    com.netflix.eureka: INFO
+    com.netflix.discovery: INFO
+    org.springframework.cloud: INFO
