@@ -1,6 +1,6 @@
 FROM openjdk:22-jdk-slim
 
-LABEL maintainer="mealbroker-team@example.com"
+LABEL maintainer="Gary Kar"
 
 WORKDIR /app
 
