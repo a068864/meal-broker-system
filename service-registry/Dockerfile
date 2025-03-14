@@ -5,7 +5,7 @@ LABEL maintainer="Gary Kar"
 WORKDIR /app
 
 # Copy the jar file
-COPY target/service-registry-1.0.0-SNAPSHOT.jar service-registry.jar
+COPY target/service-registry-1.0.0-SNAPSHOT.jar /app/service-registry.jar
 
 # Expose the port the service runs on
 EXPOSE 8761
