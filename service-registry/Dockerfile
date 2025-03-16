@@ -1,11 +1,13 @@
-FROM openjdk:17-jdk-slim
+FROM openjdk:22-jdk-slim
 
 LABEL maintainer="Gary Kar"
 
 WORKDIR /app
 
+ARG JAR_FILE=target/service-registry-1.0.0-SNAPSHOT.jar
+
 # Copy the jar file
-COPY target/service-registry-1.0.0-SNAPSHOT.jar app.jar
+COPY ${JAR_FILE} app.jar
 
 # Expose the port the service runs on
 EXPOSE 8761
