@@ -1,0 +1,30 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: location-service
+
+  # Config server properties (optional)
+  config:
+    import: "optional:configserver:http://localhost:8888"
+
+# Eureka client configuration
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.mealbroker: DEBUG
+
+# Google Maps API
+google:
+  maps:
+    api:
+      key: ${GOOGLE_MAPS_API_KEY:AIzaSyBBtFaDsEqt3JDc8xMvyvlEx85OpROdj7s}
