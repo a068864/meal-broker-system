@@ -14,6 +14,7 @@ EXPOSE 8086
 ENV SPRING_PROFILES_ACTIVE=prod
 ENV EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
 ENV SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+ENV GOOGLE_MAPS_API_KEY=AIzaSyBBtFaDsEqt3JDc8xMvyvlEx85OpROdj7s
 
 # Command to run the application
 ENTRYPOINT ["java", "-jar", "location-service.jar"]
