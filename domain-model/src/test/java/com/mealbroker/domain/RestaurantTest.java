@@ -54,8 +54,8 @@ public class RestaurantTest {
         assertTrue(restaurant.getBranches().isEmpty());
 
         // Create branches
-        Branch branch1 = new Branch("Downtown", new Location(40.7128, -74.0060));
-        Branch branch2 = new Branch("Uptown", new Location(40.8075, -73.9626));
+        Branch branch1 = new Branch("Downtown", new Location(43.6532, -79.3832));
+        Branch branch2 = new Branch("North York", new Location(43.7615, -79.4111));
 
         // Test adding branches
         restaurant.addBranch(branch1);
@@ -83,14 +83,14 @@ public class RestaurantTest {
     void testGetActiveBranches() {
         Restaurant restaurant = new Restaurant("McDonald's", "Fast Food");
 
-        Branch branch1 = new Branch("Downtown", new Location(40.7128, -74.0060));
+        Branch branch1 = new Branch("Downtown", new Location(43.6532, -79.3832));
         branch1.setActive(true);
 
-        Branch branch2 = new Branch("Uptown", new Location(40.8075, -73.9626));
+        Branch branch2 = new Branch("North York", new Location(43.7615, -79.4111));
         branch2.setActive(false);
         assertFalse(branch2.isActive());
 
-        Branch branch3 = new Branch("Midtown", new Location(40.7549, -73.9840));
+        Branch branch3 = new Branch("Midtown", new Location(43.7046, -79.3980));
         branch3.setActive(true);
 
         restaurant.addBranch(branch1);
@@ -106,8 +106,8 @@ public class RestaurantTest {
         Restaurant restaurant = new Restaurant(1L, "McDonald's", "Fast Food");
 
         // Add some branches
-        Branch branch1 = new Branch("Downtown", new Location(40.7128, -74.0060));
-        Branch branch2 = new Branch("Uptown", new Location(40.8075, -73.9626));
+        Branch branch1 = new Branch("Downtown", new Location(43.6532, -79.3832));
+        Branch branch2 = new Branch("North York", new Location(43.7615, -79.4111));
         restaurant.addBranch(branch1);
         restaurant.addBranch(branch2);
 

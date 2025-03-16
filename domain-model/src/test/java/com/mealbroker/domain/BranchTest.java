@@ -21,7 +21,7 @@ public class BranchTest {
         assertNull(branch1.getLocation());
 
         // Constructor with name and location
-        Location location = new Location(40.7128, -74.0060);
+        Location location = new Location(43.6532, -79.3832);
         Branch branch2 = new Branch("Downtown", location);
         assertNull(branch2.getBranchId());
         assertEquals("Downtown", branch2.getBranchName());
@@ -40,23 +40,23 @@ public class BranchTest {
 
         branch.setBranchId(1L);
         branch.setBranchName("Downtown");
-        Location location = new Location(40.7128, -74.0060);
+        Location location = new Location(43.6532, -79.3832);
         branch.setLocation(location);
-        branch.setAddress("123 Main St, New York, NY");
+        branch.setAddress("123 Yonge St, Toronto, ON");
         branch.setActive(true);
         branch.setOperatingRadius(5);
 
         assertEquals(1L, branch.getBranchId());
         assertEquals("Downtown", branch.getBranchName());
         assertEquals(location, branch.getLocation());
-        assertEquals("123 Main St, New York, NY", branch.getAddress());
+        assertEquals("123 Yonge St, Toronto, ON", branch.getAddress());
         assertTrue(branch.isActive());
         assertEquals(5, branch.getOperatingRadius());
     }
 
     @Test
     void testRestaurantRelationship() {
-        Branch branch = new Branch("Downtown", new Location(40.7128, -74.0060));
+        Branch branch = new Branch("Downtown", new Location(43.6532, -79.3832));
         Restaurant restaurant = new Restaurant("McDonald's", "Fast Food");
 
         // Test setting restaurant
@@ -67,7 +67,7 @@ public class BranchTest {
 
     @Test
     void testMenuRelationship() {
-        Branch branch = new Branch("Downtown", new Location(40.7128, -74.0060));
+        Branch branch = new Branch("Downtown", new Location(43.6532, -79.3832));
         Menu menu = new Menu(1L);
 
         // Test bidirectional relationship
@@ -82,7 +82,7 @@ public class BranchTest {
 
     @Test
     void testOrderOperations() {
-        Branch branch = new Branch("Downtown", new Location(40.7128, -74.0060));
+        Branch branch = new Branch("Downtown", new Location(43.6532, -79.3832));
         Customer customer = new Customer("John Doe", "john@example.com", "+12345678901");
         Restaurant restaurant = new Restaurant("McDonald's", "Fast Food");
         branch.setRestaurant(restaurant);
@@ -116,7 +116,7 @@ public class BranchTest {
 
     @Test
     void testIsActive() {
-        Branch branch = new Branch("Downtown", new Location(40.7128, -74.0060));
+        Branch branch = new Branch("Downtown", new Location(43.6532, -79.3832));
 
         // Default value
         assertTrue(branch.isActive());
@@ -138,15 +138,15 @@ public class BranchTest {
 
     @Test
     void testToString() {
-        Branch branch = new Branch(1L, "Downtown", new Location(40.7128, -74.0060));
-        branch.setAddress("123 Main St, New York, NY");
+        Branch branch = new Branch(1L, "Downtown", new Location(43.6532, -79.3832));
+        branch.setAddress("123 Yonge St, Toronto, ON");
         branch.setActive(true);
 
         String toString = branch.toString();
 
         assertTrue(toString.contains("branchId=1"));
         assertTrue(toString.contains("branchName='Downtown'"));
-        assertTrue(toString.contains("address='123 Main St, New York, NY'"));
+        assertTrue(toString.contains("address='123 Yonge St, Toronto, ON'"));
         assertTrue(toString.contains("isActive=true"));
     }
 
@@ -154,7 +154,7 @@ public class BranchTest {
     void testValidation() {
         // Branch name is required
         Branch invalidBranch1 = new Branch();
-        invalidBranch1.setLocation(new Location(40.7128, -74.0060));
+        invalidBranch1.setLocation(new Location(43.6532, -79.3832));
         assertFalse(validator.validate(invalidBranch1).isEmpty());
 
         // Location is required
@@ -162,7 +162,7 @@ public class BranchTest {
         assertFalse(validator.validate(invalidBranch2).isEmpty());
 
         // Valid branch
-        Branch validBranch = new Branch("Downtown", new Location(40.7128, -74.0060));
+        Branch validBranch = new Branch("Downtown", new Location(43.6532, -79.3832));
         assertEquals(0, validator.validate(validBranch).size());
     }
 }
