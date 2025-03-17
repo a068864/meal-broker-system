@@ -126,8 +126,10 @@ public class Customer {
      * @param order the order to add
      */
     public void addOrder(Order order) {
-        orders.add(order);
-        order.setCustomer(this);
+        if (!orders.contains(order)) {
+            orders.add(order);
+            order.setCustomer(this);
+        }
     }
 
     /**
@@ -136,8 +138,10 @@ public class Customer {
      * @param order the order to remove
      */
     public void removeOrder(Order order) {
-        orders.remove(order);
-        order.setCustomer(null);
+        if (orders.contains(order)) {
+            orders.remove(order);
+            order.setCustomer(null);
+        }
     }
 
     @Override

@@ -1,0 +1,41 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: order-broker
+  cloud:
+    discovery:
+      enabled: false
+  main:
+    allow-bean-definition-overriding: true
+
+# Feign client configuration
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic
+  circuitbreaker:
+    enabled: true
+  # Configure URL for WireMock server
+  url:
+    customer-service: http://localhost:8090
+    restaurant-service: http://localhost:8090
+    order-service: http://localhost:8090
+    location-service: http://localhost:8090
+
+# Eureka configuration (disabled for tests)
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
+
+# Logging configuration for tests
+logging:
+  level:
+    com.mealbroker: DEBUG
+    org.springframework.cloud.openfeign: DEBUG

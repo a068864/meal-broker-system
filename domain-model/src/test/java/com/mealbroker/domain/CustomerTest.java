@@ -110,4 +110,54 @@ public class CustomerTest {
         Customer invalidPhone = new Customer("John Doe", "john@example.com", "invalid-phone");
         assertFalse(validator.validate(invalidPhone).isEmpty());
     }
+
+    @Test
+    void testLocationRelationship() {
+        Customer customer = new Customer("John Doe", "john@example.com", "+12345678901");
+
+        // Initially null
+        assertNull(customer.getLocation());
+
+        // Set location
+        Location toronto = new Location(43.6532, -79.3832);
+        customer.setLocation(toronto);
+        assertEquals(toronto, customer.getLocation());
+        assertEquals(43.6532, customer.getLocation().getLatitude());
+        assertEquals(-79.3832, customer.getLocation().getLongitude());
+
+        // Update location
+        Location montreal = new Location(45.5017, -73.5673);
+        customer.setLocation(montreal);
+        assertEquals(montreal, customer.getLocation());
+
+        // Set to null again
+        customer.setLocation(null);
+        assertNull(customer.getLocation());
+    }
+
+    @Test
+    void testDuplicateOrders() {
+        Customer customer = new Customer("John Doe", "john@example.com", "+12345678901");
+        Restaurant restaurant = new Restaurant("Test Restaurant", "Test Cuisine");
+
+        // Create an order
+        Order order = new Order(customer, restaurant);
+
+        // Add the order
+        customer.addOrder(order);
+        assertEquals(1, customer.getOrders().size());
+
+        // Try tp add the same order again
+        customer.addOrder(order);
+
+        // Duplicate orders should be counted once only
+        assertEquals(1, customer.getOrders().size(), "Duplicate orders should not be added");
+
+        // Create a new order with the same properties as the old order
+        Order similarOrder = new Order(customer, restaurant);
+        customer.addOrder(similarOrder);
+
+        // There should be two separate orders
+        assertEquals(2, customer.getOrders().size());
+    }
 }
