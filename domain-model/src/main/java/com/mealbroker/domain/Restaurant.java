@@ -25,10 +25,12 @@ public class Restaurant {
     @Column(name = "cuisine")
     private String cuisine;
 
+    // Branches should be fully managed by Restaurant
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Branch> branches = new ArrayList<>();
 
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+    // Orders should not be deleted when Restaurant is deleted
+    @OneToMany(mappedBy = "restaurant", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Order> orders = new ArrayList<>();
 
     /**

@@ -16,9 +16,11 @@ public class Menu {
     @Column(name = "menu_id")
     private Long menuId;
 
+    // Menu items are fully managed by Menu
     @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MenuItem> items = new ArrayList<>();
 
+    // Branch should not be deleted when Menu is deleted
     @OneToOne(mappedBy = "menu")
     private Branch branch;
 

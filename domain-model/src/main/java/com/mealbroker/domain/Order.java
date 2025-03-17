@@ -19,6 +19,7 @@ public class Order {
     @Column(name = "order_id")
     private Long orderId;
 
+    // Customer, Restaurant, Branch should not be deleted when Order is deleted
     @NotNull(message = "Customer is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
@@ -33,6 +34,7 @@ public class Order {
     @JoinColumn(name = "branch_id")
     private Branch branch;
 
+    // Order Items are fully managed by Order
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
 
@@ -82,7 +84,17 @@ public class Order {
     }
 
     public void setCustomer(Customer customer) {
+        // Remove from old customer if exists
+        if (this.customer != null && !this.customer.equals(customer)) {
+            this.customer.getOrders().remove(this);
+        }
+
         this.customer = customer;
+
+        // Add to new customer if not null and not already in customer's orders
+        if (customer != null && !customer.getOrders().contains(this)) {
+            customer.getOrders().add(this);
+        }
     }
 
     public Restaurant getRestaurant() {
@@ -90,7 +102,17 @@ public class Order {
     }
 
     public void setRestaurant(Restaurant restaurant) {
+        // Remove from old restaurant if exists
+        if (this.restaurant != null && !this.restaurant.equals(restaurant)) {
+            this.restaurant.getOrders().remove(this);
+        }
+
         this.restaurant = restaurant;
+
+        // Add to new restaurant if not null and not already in restaurant's orders
+        if (restaurant != null && !restaurant.getOrders().contains(this)) {
+            restaurant.getOrders().add(this);
+        }
     }
 
     public Long getRestaurantId() {
@@ -102,7 +124,17 @@ public class Order {
     }
 
     public void setBranch(Branch branch) {
+        // Remove from old branch if exists
+        if (this.branch != null && !this.branch.equals(branch)) {
+            this.branch.getOrders().remove(this);
+        }
+
         this.branch = branch;
+
+        // Add to new branch if not null and not already in branch's orders
+        if (branch != null && !branch.getOrders().contains(this)) {
+            branch.getOrders().add(this);
+        }
     }
 
     public Long getBranchId() {
@@ -228,7 +260,9 @@ public class Order {
      */
     public boolean removeItem(OrderItem item) {
         boolean removed = items.remove(item);
-        item.setOrder(null);
+        if (removed) {
+            item.setOrder(null);
+        }
         return removed;
     }
 

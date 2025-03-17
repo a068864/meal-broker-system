@@ -35,7 +35,7 @@ public class Customer {
     @Embedded
     private Location location;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "customer", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = false)
     private List<Order> orders = new ArrayList<>();
 
     /**

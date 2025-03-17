@@ -196,7 +196,7 @@ public class GoogleMapsLocationServiceImpl implements LocationService {
                     if (distanceInMeters <= maxDistance * 1000) {
                         Branch branch = activeBranches.get(i);
                         // Store distance for sorting (could use a wrapper class in a real implementation)
-                        branch.setOperatingRadius((int)(distanceInMeters / 1000));
+                        branch.setOperatingRadius((int) (distanceInMeters / 1000));
                         nearbyBranches.add(branch);
                     }
                 }
@@ -305,7 +305,7 @@ public class GoogleMapsLocationServiceImpl implements LocationService {
 
             // Get the optimized route
             DirectionsRoute route = result.routes[0];
-            
+
             List<Location> optimizedRoute = new ArrayList<>();
             optimizedRoute.add(start);
 

@@ -3,6 +3,7 @@ package com.mealbroker.domain;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,10 @@ public class OrderItem {
     @JoinColumn(name = "order_id")
     private Order order;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "menu_item_id")
+    private MenuItem menuItem;
+
     @NotNull(message = "Menu item ID is required")
     @Column(name = "menu_item_id", nullable = false)
     private Long menuItemId;
@@ -31,7 +36,7 @@ public class OrderItem {
 
     @Min(value = 1, message = "Quantity must be at least 1")
     @Column(name = "quantity", nullable = false)
-    private int quantity;
+    private int quantity = 1;
 
     @Min(value = 0, message = "Price cannot be negative")
     @Column(name = "price", nullable = false)
@@ -39,8 +44,9 @@ public class OrderItem {
 
     @Min(value = 0, message = "Additional charges cannot be negative")
     @Column(name = "additional_charges")
-    private double additionalCharges;
+    private double additionalCharges = 0.0;
 
+    @Size(max = 500, message = "Special instructions cannot exceed 500 characters")
     @ElementCollection
     @CollectionTable(name = "order_item_instructions", joinColumns = @JoinColumn(name = "order_item_id"))
     @Column(name = "instruction")
@@ -129,6 +135,22 @@ public class OrderItem {
 
     public void setOrder(Order order) {
         this.order = order;
+    }
+
+    public MenuItem getMenuItem() {
+        return menuItem;
+    }
+
+    public void setMenuItem(MenuItem menuItem) {
+        this.menuItem = menuItem;
+        if (menuItem != null) {
+            this.menuItemId = menuItem.getMenuItemId();
+            this.menuItemName = menuItem.getName();
+            // Optionally sync price if it should come from the menu item
+            if (this.price <= 0) {
+                this.price = menuItem.getPrice();
+            }
+        }
     }
 
     public Long getMenuItemId() {

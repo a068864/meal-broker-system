@@ -1,6 +1,7 @@
 package com.mealbroker.domain;
 
 import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -20,11 +21,13 @@ public class Location implements Serializable {
     @NotNull(message = "Latitude is required")
     @Min(value = -90, message = "Latitude must be between -90 and 90")
     @Max(value = 90, message = "Latitude must be between -90 and 90")
+    @Digits(integer = 2, fraction = 6, message = "Latitude must have at most 2 integer digits and 6 fraction digits")
     private Double latitude;
 
     @NotNull(message = "Longitude is required")
     @Min(value = -180, message = "Longitude must be between -180 and 180")
     @Max(value = 180, message = "Longitude must be between -180 and 180")
+    @Digits(integer = 2, fraction = 6, message = "Longitude must have at most 2 integer digits and 6 fraction digits")
     private Double longitude;
 
     /**

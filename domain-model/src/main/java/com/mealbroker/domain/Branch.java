@@ -33,17 +33,19 @@ public class Branch {
     private Boolean isActive = true;
 
     @Column(name = "operating_radius")
-    private Integer operatingRadius;
+    private Integer operatingRadius = 10;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    // Menu is fully managed by Branch
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "menu_id")
     private Menu menu;
 
-    @OneToMany(mappedBy = "branch", cascade = CascadeType.ALL)
+    // Orders should not be deleted when Branch is deleted
+    @OneToMany(mappedBy = "branch", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Order> orders = new ArrayList<>();
 
     // Constructors
