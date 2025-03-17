@@ -44,6 +44,12 @@ public class Menu {
     }
 
     public void setItems(List<MenuItem> items) {
+        List<MenuItem> itemsToRemove = new ArrayList<>(this.items);
+        for (MenuItem item : itemsToRemove) {
+            if (item.getMenu() == this) {
+                item.setMenu(null);
+            }
+        }
         this.items.clear();
         if (items != null) {
             for (MenuItem item : items) {

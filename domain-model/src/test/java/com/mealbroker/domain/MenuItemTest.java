@@ -3,6 +3,8 @@ package com.mealbroker.domain;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -10,130 +12,216 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for the MenuItem class
+ */
+@DisplayName("MenuItem")
 public class MenuItemTest {
 
     private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     private final Validator validator = factory.getValidator();
 
-    @Test
-    void testConstructors() {
-        // Default constructor
-        MenuItem item1 = new MenuItem();
-        assertNull(item1.getMenuItemId());
-        assertNull(item1.getName());
-        assertNull(item1.getDescription());
-        assertEquals(0.0, item1.getPrice());
-        assertTrue(item1.isAvailable());
-        assertEquals(100, item1.getStock());
+    private MenuItem menuItem;
+    private Menu menu;
 
-        // Constructor with basic info
-        MenuItem item2 = new MenuItem("Burger", "Classic beef burger", 5.99);
-        assertNull(item2.getMenuItemId());
-        assertEquals("Burger", item2.getName());
-        assertEquals("Classic beef burger", item2.getDescription());
-        assertEquals(5.99, item2.getPrice());
-
-        // Constructor with ID and basic info
-        MenuItem item3 = new MenuItem(1L, "Fries", "Golden french fries", 2.99);
-        assertEquals(1L, item3.getMenuItemId());
-        assertEquals("Fries", item3.getName());
-        assertEquals("Golden french fries", item3.getDescription());
-        assertEquals(2.99, item3.getPrice());
+    @BeforeEach
+    void setUp() {
+        menuItem = new MenuItem("Burger", "Classic beef burger", 5.99);
+        menu = new Menu(1L);
     }
 
     @Test
-    void testSetters() {
-        MenuItem item = new MenuItem();
+    void testConstructors() {
+        MenuItem defaultItem = new MenuItem();
+        assertNull(defaultItem.getMenuItemId());
+        assertNull(defaultItem.getName());
+        assertNull(defaultItem.getDescription());
+        assertEquals(0.0, defaultItem.getPrice());
+        assertTrue(defaultItem.isAvailable()); // Default available
+        assertEquals(100, defaultItem.getStock()); // Default stock
+        assertNotNull(defaultItem.getAllergens());
+        assertTrue(defaultItem.getAllergens().isEmpty());
 
-        item.setMenuItemId(1L);
-        item.setName("Burger");
-        item.setDescription("Classic beef burger");
-        item.setPrice(5.99);
-        item.setAvailable(true);
-        item.setStock(50);
+        String name = "Burger";
+        String description = "Classic beef burger";
+        double price = 5.99;
+        MenuItem item = new MenuItem(name, description, price);
 
-        assertEquals(1L, item.getMenuItemId());
-        assertEquals("Burger", item.getName());
-        assertEquals("Classic beef burger", item.getDescription());
-        assertEquals(5.99, item.getPrice());
-        assertTrue(item.isAvailable());
-        assertEquals(50, item.getStock());
+        assertNull(item.getMenuItemId());
+        assertEquals(name, item.getName());
+        assertEquals(description, item.getDescription());
+        assertEquals(price, item.getPrice());
+        assertTrue(item.isAvailable()); // Default available
+        assertEquals(100, item.getStock()); // Default stock
+
+        Long id = 42L;
+        MenuItem item2 = new MenuItem(id, name, description, price);
+        assertEquals(id, item2.getMenuItemId());
+        assertEquals(name, item2.getName());
+        assertEquals(description, item2.getDescription());
+        assertEquals(price, item2.getPrice());
+        assertTrue(item2.isAvailable()); // Default available
+        assertEquals(100, item2.getStock()); // Default stock
+    }
+
+    @Test
+    void testSetMenuItemId() {
+        Long id = 42L;
+        menuItem.setMenuItemId(id);
+        assertEquals(id, menuItem.getMenuItemId());
+    }
+
+    @Test
+    void testSetName() {
+        String name = "Cheeseburger";
+        menuItem.setName(name);
+        assertEquals(name, menuItem.getName());
+    }
+
+    @Test
+    void testSetDescription() {
+        String description = "Delicious burger with cheese";
+        menuItem.setDescription(description);
+        assertEquals(description, menuItem.getDescription());
+    }
+
+    @Test
+    void testSetPrice() {
+        double price = 6.99;
+        menuItem.setPrice(price);
+        assertEquals(price, menuItem.getPrice());
+    }
+
+    @Test
+    void testSetAvailable() {
+        // Default is true
+        assertTrue(menuItem.isAvailable());
+
+        // Set to false
+        menuItem.setAvailable(false);
+        assertFalse(menuItem.isAvailable());
+
+        // Set to true again
+        menuItem.setAvailable(true);
+        assertTrue(menuItem.isAvailable());
+    }
+
+    @Test
+    void testSetStock() {
+        int stock = 50;
+        menuItem.setStock(stock);
+        assertEquals(stock, menuItem.getStock());
     }
 
     @Test
     void testMenuRelationship() {
-        MenuItem item = new MenuItem("Burger", "Classic beef burger", 5.99);
-        Menu menu = new Menu(1L);
+        menuItem.setMenu(menu);
+        assertEquals(menu, menuItem.getMenu());
+        assertTrue(menu.getItems().contains(menuItem));
 
-        // Test setting menu
-        item.setMenu(menu);
-        assertEquals(menu, item.getMenu());
-    }
+        // Test with a new menu
+        Menu newMenu = new Menu(2L);
+        menuItem.setMenu(newMenu);
+        assertEquals(newMenu, menuItem.getMenu());
+        assertTrue(newMenu.getItems().contains(menuItem));
+        assertFalse(menu.getItems().contains(menuItem));
 
-    @Test
-    void testNegativeValueHandling() {
-        MenuItem item = new MenuItem();
-
-        // Price cannot be negative
-        item.setPrice(-5.99);
-        assertEquals(0.0, item.getPrice());
-
-        // Stock cannot be negative
-        item.setStock(-10);
-        assertEquals(0, item.getStock());
+        // Test with null
+        menuItem.setMenu(null);
+        assertNull(menuItem.getMenu());
+        assertFalse(newMenu.getItems().contains(menuItem));
     }
 
     @Test
     void testReduceStock() {
-        MenuItem item = new MenuItem("Burger", "Classic beef burger", 5.99);
-
         // Initial stock is 100
-        assertEquals(100, item.getStock());
-        assertTrue(item.isAvailable());
+        assertEquals(100, menuItem.getStock());
+        assertTrue(menuItem.isAvailable());
 
         // Reduce by 30
-        item.reduceStock(30);
-        assertEquals(70, item.getStock());
-        assertTrue(item.isAvailable());
+        boolean result1 = menuItem.reduceStock(30);
+        assertTrue(result1);
+        assertEquals(70, menuItem.getStock());
+        assertTrue(menuItem.isAvailable());
 
         // Reduce by 50
-        item.reduceStock(50);
-        assertEquals(20, item.getStock());
-        assertTrue(item.isAvailable());
+        boolean result2 = menuItem.reduceStock(50);
+        assertTrue(result2);
+        assertEquals(20, menuItem.getStock());
+        assertTrue(menuItem.isAvailable());
 
-        // Reduce by 25 (should cap at 0 and set available to false)
-        item.reduceStock(25);
-        assertEquals(0, item.getStock());
-        assertFalse(item.isAvailable());
+        // Reduce by 25 (more than available, should cap at 0 and set available to false)
+        boolean result3 = menuItem.reduceStock(25);
+        assertFalse(result3);
+        assertEquals(0, menuItem.getStock());
+        assertFalse(menuItem.isAvailable());
 
         // Further reduction should not go below 0
-        item.reduceStock(10);
-        assertEquals(0, item.getStock());
+        boolean result4 = menuItem.reduceStock(10);
+        assertFalse(result4);
+        assertEquals(0, menuItem.getStock());
+        assertFalse(menuItem.isAvailable());
+
+        // Test with negative or zero quantity (should return true and not change stock)
+        boolean result5 = menuItem.reduceStock(0);
+        assertTrue(result5);
+        assertEquals(0, menuItem.getStock());
+
+        boolean result6 = menuItem.reduceStock(-5);
+        assertTrue(result6);
+        assertEquals(0, menuItem.getStock());
     }
 
     @Test
-    void testAllergenOperations() {
-        MenuItem item = new MenuItem("Burger", "Classic beef burger", 5.99);
-
+    void testAddAllergen() {
         // Initial state
-        assertTrue(item.getAllergens().isEmpty());
+        assertTrue(menuItem.getAllergens().isEmpty());
 
         // Add allergens
-        item.addAllergen("Gluten");
-        item.addAllergen("Dairy");
+        menuItem.addAllergen("Gluten");
+        menuItem.addAllergen("Dairy");
 
         List<String> expected = Arrays.asList("Gluten", "Dairy");
-        assertEquals(expected, item.getAllergens());
+        assertEquals(expected, menuItem.getAllergens());
+        assertEquals(2, menuItem.getAllergens().size());
+    }
 
-        // Remove allergen
-        item.removeAllergen("Gluten");
-        assertEquals(1, item.getAllergens().size());
-        assertEquals("Dairy", item.getAllergens().get(0));
+    @Test
+    void testRemoveAllergen() {
+        // Add some allergens first
+        menuItem.addAllergen("Gluten");
+        menuItem.addAllergen("Dairy");
+        menuItem.addAllergen("Eggs");
 
-        // Set allergens
+        // Remove an allergen
+        menuItem.removeAllergen("Gluten");
+        assertEquals(2, menuItem.getAllergens().size());
+        assertFalse(menuItem.getAllergens().contains("Gluten"));
+        assertTrue(menuItem.getAllergens().contains("Dairy"));
+        assertTrue(menuItem.getAllergens().contains("Eggs"));
+
+        // Try removing an allergen that doesn't exist
+        menuItem.removeAllergen("Nuts");
+        assertEquals(2, menuItem.getAllergens().size());
+    }
+
+    @Test
+    void testSetAllergens() {
+        // Add some allergens first
+        menuItem.addAllergen("Gluten");
+        menuItem.addAllergen("Dairy");
+
+        // Set new allergens
         List<String> newAllergens = Arrays.asList("Eggs", "Soy", "Nuts");
-        item.setAllergens(newAllergens);
-        assertEquals(newAllergens, item.getAllergens());
+        menuItem.setAllergens(newAllergens);
+
+        assertEquals(newAllergens, menuItem.getAllergens());
+        assertEquals(3, menuItem.getAllergens().size());
+
+        // Test with null (should set empty list)
+        menuItem.setAllergens(null);
+        assertNotNull(menuItem.getAllergens());
+        assertTrue(menuItem.getAllergens().isEmpty());
     }
 
     @Test
@@ -143,7 +231,6 @@ public class MenuItemTest {
         item.setAvailable(true);
 
         String toString = item.toString();
-
         assertTrue(toString.contains("menuItemId=1"));
         assertTrue(toString.contains("name='Burger'"));
         assertTrue(toString.contains("price=5.99"));
@@ -152,17 +239,20 @@ public class MenuItemTest {
     }
 
     @Test
-    void testValidation() {
-        // Name is required
-        MenuItem invalidItem = new MenuItem(null, "Description", 5.99);
-        assertFalse(validator.validate(invalidItem).isEmpty());
-
-        // Price must be non-negative
-        MenuItem negativePriceItem = new MenuItem("Burger", "Description", -5.99);
-        assertFalse(validator.validate(negativePriceItem).isEmpty());
-
-        // Valid item
+    void testValidMenuItem() {
         MenuItem validItem = new MenuItem("Burger", "Description", 5.99);
         assertEquals(0, validator.validate(validItem).size());
+    }
+
+    @Test
+    void testInvalidMenuItemNullName() {
+        MenuItem invalidItem = new MenuItem(null, "Description", 5.99);
+        assertFalse(validator.validate(invalidItem).isEmpty());
+    }
+
+    @Test
+    void testInvalidMenuItemNegativePrice() {
+        MenuItem negativePriceItem = new MenuItem("Burger", "Description", -5.99);
+        assertFalse(validator.validate(negativePriceItem).isEmpty());
     }
 }

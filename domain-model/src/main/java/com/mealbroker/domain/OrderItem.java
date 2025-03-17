@@ -32,7 +32,7 @@ public class OrderItem {
 
     @Min(value = 1, message = "Quantity must be at least 1")
     @Column(name = "quantity", nullable = false)
-    private int quantity = 1;
+    private int quantity;
 
     @Min(value = 0, message = "Price cannot be negative")
     @Column(name = "price", nullable = false)
@@ -57,22 +57,22 @@ public class OrderItem {
     public OrderItem(Long orderItemId, int quantity) {
         this();
         this.orderItemId = orderItemId;
-        this.quantity = Math.max(1, quantity);
+        setQuantity(quantity);
     }
 
     public OrderItem(Long menuItemId, int quantity, double price) {
         this();
         this.menuItemId = menuItemId;
-        this.quantity = Math.max(1, quantity);
-        this.price = Math.max(0.0, price);
+        setQuantity(quantity);
+        setPrice(price);
     }
 
     public OrderItem(Long menuItemId, String menuItemName, int quantity, double price) {
         this();
         this.menuItemId = menuItemId;
         this.menuItemName = menuItemName;
-        this.quantity = Math.max(1, quantity);
-        this.price = Math.max(0.0, price);
+        setQuantity(quantity);
+        setPrice(price);
     }
 
     public OrderItem(Long orderItemId, Long menuItemId, String menuItemName, int quantity, double price) {
@@ -80,8 +80,8 @@ public class OrderItem {
         this.orderItemId = orderItemId;
         this.menuItemId = menuItemId;
         this.menuItemName = menuItemName;
-        this.quantity = Math.max(1, quantity);
-        this.price = Math.max(0.0, price);
+        setQuantity(quantity);
+        setPrice(price);
     }
 
     public Long getOrderItemId() {

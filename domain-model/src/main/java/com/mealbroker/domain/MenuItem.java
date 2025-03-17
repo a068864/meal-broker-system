@@ -50,15 +50,15 @@ public class MenuItem {
 
     public MenuItem(String name, String description, double price) {
         this.name = name;
-        this.description = description;
-        this.price = price;
+        setDescription(description);
+        setPrice(price);
     }
 
     public MenuItem(Long menuItemId, String name, String description, double price) {
         this.menuItemId = menuItemId;
         this.name = name;
-        this.description = description;
-        this.price = price;
+        setDescription(description);
+        setPrice(price);
     }
 
     public Long getMenuItemId() {
@@ -113,12 +113,15 @@ public class MenuItem {
         if (quantity <= 0) {
             return true;
         }
-        if (quantity > this.stock) {
-            return false;
-        }
-        this.stock -= quantity;
-        if (this.stock <= 0) {
+        if (stock < quantity) {
+            stock = 0;
             this.isAvailable = false;
+            return false;
+        } else {
+            this.stock -= quantity;
+            if (this.stock == 0) {
+                this.isAvailable = false;
+            }
         }
         return true;
     }

@@ -78,7 +78,8 @@ public class Restaurant {
     }
 
     public void setBranches(List<Branch> branches) {
-        for (Branch branch : this.branches) {
+        List<Branch> branchesToRemove = new ArrayList<>(this.branches);
+        for (Branch branch : branchesToRemove) {
             removeBranch(branch);
         }
         if (branches != null) {
