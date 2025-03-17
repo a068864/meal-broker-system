@@ -4,10 +4,10 @@ server:
 spring:
   application:
     name: order-broker
-
-  # Config server properties (optional)
   config:
-    import: "optional:configserver:http://localhost:8888"
+    import:
+      - optional:configserver:http://localhost:8888
+      - optional:configserver:http://localhost:8888/resilience4j-base.yml
 
 # Eureka client configuration
 eureka:
@@ -16,68 +16,6 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
   instance:
     prefer-ip-address: true
-
-# Resilience4j configuration
-resilience4j:
-  retry:
-    instances:
-      placeOrder:
-        maxAttempts: 3
-        waitDuration: 1s
-        retryExceptions:
-          - org.springframework.web.client.ResourceAccessException
-          - java.util.concurrent.TimeoutException
-          - feign.FeignException.ServiceUnavailable
-          - feign.FeignException.GatewayTimeout
-        ignoreExceptions:
-          - com.mealbroker.broker.exception.BrokerException
-          - feign.FeignException.BadRequest
-        enableExponentialBackoff: true
-        exponentialBackoffMultiplier: 2
-      locationService:
-        maxAttempts: 3
-        waitDuration: 500ms
-      restaurantService:
-        maxAttempts: 3
-        waitDuration: 500ms
-
-  circuitbreaker:
-    instances:
-      placeOrder:
-        registerHealthIndicator: true
-        slidingWindowSize: 10
-        minimumNumberOfCalls: 5
-        permittedNumberOfCallsInHalfOpenState: 3
-        automaticTransitionFromOpenToHalfOpenEnabled: true
-        waitDurationInOpenState: 5s
-        failureRateThreshold: 50
-        eventConsumerBufferSize: 10
-      updateOrderStatus:
-        registerHealthIndicator: true
-        slidingWindowSize: 10
-        minimumNumberOfCalls: 5
-        permittedNumberOfCallsInHalfOpenState: 3
-        automaticTransitionFromOpenToHalfOpenEnabled: true
-        waitDurationInOpenState: 5s
-        failureRateThreshold: 50
-        eventConsumerBufferSize: 10
-      cancelOrder:
-        registerHealthIndicator: true
-        slidingWindowSize: 10
-        minimumNumberOfCalls: 5
-        permittedNumberOfCallsInHalfOpenState: 3
-        automaticTransitionFromOpenToHalfOpenEnabled: true
-        waitDurationInOpenState: 5s
-        failureRateThreshold: 50
-        eventConsumerBufferSize: 10
-  timelimiter:
-    instances:
-      placeOrder:
-        timeoutDuration: 10s
-      updateOrderStatus:
-        timeoutDuration: 4s
-      cancelOrder:
-        timeoutDuration: 6s
 
 # Feign client configuration
 feign:
