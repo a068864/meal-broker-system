@@ -19,7 +19,7 @@ services:
     ports:
       - "8888:8888"
     environment:
-      - SPRING_PROFILES_ACTIVE=native
+      - SPRING_PROFILES_ACTIVE=docker
       - CONFIG_SERVER_USERNAME=configuser
       - CONFIG_SERVER_PASSWORD=configpassword
     depends_on:
