@@ -22,3 +22,9 @@ logging:
   level:
     root: INFO
     com.mealbroker: DEBUG
+
+# Google Maps API
+google:
+  maps:
+    api:
+      key: ${GOOGLE_MAPS_API_KEY:AIzaSyBBtFaDsEqt3JDc8xMvyvlEx85OpROdj7s}
