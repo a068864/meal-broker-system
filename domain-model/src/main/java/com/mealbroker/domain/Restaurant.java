@@ -33,30 +33,16 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Order> orders = new ArrayList<>();
 
-    /**
-     * Default constructor required by JPA
-     */
+
     public Restaurant() {
+
     }
 
-    /**
-     * Create a new restaurant with name and cuisine
-     *
-     * @param name    the restaurant name
-     * @param cuisine the restaurant cuisine type
-     */
     public Restaurant(String name, String cuisine) {
         this.name = name;
         this.cuisine = cuisine;
     }
 
-    /**
-     * Create a new restaurant with ID, name and cuisine
-     *
-     * @param restaurantId the restaurant ID
-     * @param name         the restaurant name
-     * @param cuisine      the restaurant cuisine type
-     */
     public Restaurant(Long restaurantId, String name, String cuisine) {
         this.restaurantId = restaurantId;
         this.name = name;
@@ -92,10 +78,9 @@ public class Restaurant {
     }
 
     public void setBranches(List<Branch> branches) {
-        // Clear existing branches
-        this.branches.clear();
-
-        // Add all new branches and set relationship
+        for (Branch branch : this.branches) {
+            removeBranch(branch);
+        }
         if (branches != null) {
             for (Branch branch : branches) {
                 addBranch(branch);
@@ -103,35 +88,45 @@ public class Restaurant {
         }
     }
 
-    /**
-     * Add a branch to this restaurant and establish bidirectional relationship
-     *
-     * @param branch the branch to add
-     */
     public void addBranch(Branch branch) {
-        branches.add(branch);
-        branch.setRestaurant(this);
+        if (branch != null && !branches.contains(branch)) {
+            branches.add(branch);
+            if (branch.getRestaurant() != this) {
+                branch.setRestaurant(this);
+            }
+        }
     }
 
-    /**
-     * Remove a branch from this restaurant
-     *
-     * @param branch the branch to remove
-     */
+
     public void removeBranch(Branch branch) {
-        branches.remove(branch);
-        branch.setRestaurant(null);
+        if (branch != null && branches.remove(branch)) {
+            if (branch.getRestaurant() == this) {
+                branch.setRestaurant(null);
+            }
+        }
     }
 
-    /**
-     * Get all active branches for this restaurant
-     *
-     * @return list of active branches
-     */
     public List<Branch> getActiveBranches() {
         return branches.stream()
                 .filter(Branch::isActive)
                 .collect(Collectors.toList());
+    }
+
+    public void addOrder(Order order) {
+        if (order != null && !orders.contains(order)) {
+            orders.add(order);
+            if (order.getRestaurant() != this) {
+                order.setRestaurant(this);
+            }
+        }
+    }
+
+    public void removeOrder(Order order) {
+        if (order != null && orders.remove(order)) {
+            if (order.getRestaurant() == this) {
+                order.setRestaurant(null);
+            }
+        }
     }
 
     public List<Order> getOrders() {

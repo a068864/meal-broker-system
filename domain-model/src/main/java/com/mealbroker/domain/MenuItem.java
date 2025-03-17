@@ -45,33 +45,15 @@ public class MenuItem {
     @JoinColumn(name = "menu_id")
     private Menu menu;
 
-    /**
-     * Default constructor required by JPA
-     */
     public MenuItem() {
     }
 
-    /**
-     * Create a new menu item with basic information
-     *
-     * @param name        the item name
-     * @param description the item description
-     * @param price       the item price
-     */
     public MenuItem(String name, String description, double price) {
         this.name = name;
         this.description = description;
         this.price = price;
     }
 
-    /**
-     * Create a new menu item with ID and basic information
-     *
-     * @param menuItemId  the item ID
-     * @param name        the item name
-     * @param description the item description
-     * @param price       the item price
-     */
     public MenuItem(Long menuItemId, String name, String description, double price) {
         this.menuItemId = menuItemId;
         this.name = name;
@@ -108,7 +90,7 @@ public class MenuItem {
     }
 
     public void setPrice(double price) {
-        this.price = Math.max(0, price);
+        this.price = price;
     }
 
     public boolean isAvailable() {
@@ -124,22 +106,21 @@ public class MenuItem {
     }
 
     public void setStock(int stock) {
-        this.stock = Math.max(0, stock);
+        this.stock = stock;
     }
 
-    /**
-     * Reduce the item stock by a specified quantity
-     * Updates availability if stock becomes zero
-     *
-     * @param quantity the quantity to reduce by
-     */
-    public void reduceStock(int quantity) {
-        int newStock = Math.max(0, this.stock - quantity);
-        boolean stockChanged = (this.stock != newStock);
-        this.stock = newStock;
-        if (stockChanged && this.stock <= 0) {
+    public boolean reduceStock(int quantity) {
+        if (quantity <= 0) {
+            return true;
+        }
+        if (quantity > this.stock) {
+            return false;
+        }
+        this.stock -= quantity;
+        if (this.stock <= 0) {
             this.isAvailable = false;
         }
+        return true;
     }
 
     public List<String> getAllergens() {
@@ -147,23 +128,17 @@ public class MenuItem {
     }
 
     public void setAllergens(List<String> allergens) {
+        if (allergens == null) {
+            allergens = new ArrayList<>();
+        }
         this.allergens = allergens;
     }
 
-    /**
-     * Add an allergen to this menu item
-     *
-     * @param allergen the allergen to add
-     */
+
     public void addAllergen(String allergen) {
         allergens.add(allergen);
     }
 
-    /**
-     * Remove an allergen from this menu item
-     *
-     * @param allergen the allergen to remove
-     */
     public void removeAllergen(String allergen) {
         allergens.remove(allergen);
     }
@@ -173,7 +148,16 @@ public class MenuItem {
     }
 
     public void setMenu(Menu menu) {
-        this.menu = menu;
+        if (this.menu != menu) {
+            Menu oldMenu = this.menu;
+            this.menu = menu;
+            if (oldMenu != null && oldMenu.getItems().contains(this)) {
+                oldMenu.removeItem(this);
+            }
+            if (menu != null && !menu.getItems().contains(this)) {
+                menu.addItem(this);
+            }
+        }
     }
 
     @Override

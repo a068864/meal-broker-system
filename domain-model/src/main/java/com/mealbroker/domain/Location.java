@@ -1,6 +1,7 @@
 package com.mealbroker.domain;
 
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -30,18 +31,10 @@ public class Location implements Serializable {
     @Digits(integer = 2, fraction = 6, message = "Longitude must have at most 2 integer digits and 6 fraction digits")
     private Double longitude;
 
-    /**
-     * Default constructor required by JPA
-     */
     public Location() {
+
     }
 
-    /**
-     * Create a new location with specified coordinates
-     *
-     * @param latitude  the latitude coordinate
-     * @param longitude the longitude coordinate
-     */
     public Location(Double latitude, Double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
@@ -63,12 +56,7 @@ public class Location implements Serializable {
         this.longitude = longitude;
     }
 
-    /**
-     * Calculate distance to another location using the Haversine formula
-     *
-     * @param other the other location
-     * @return distance in kilometers
-     */
+    @Transient
     public double distanceTo(Location other) {
         if (other == null) {
             return Double.MAX_VALUE;
@@ -86,13 +74,6 @@ public class Location implements Serializable {
         return EARTH_RADIUS_KM * c;
     }
 
-    /**
-     * Check if this location is within a specified radius of another location
-     *
-     * @param other    the other location
-     * @param radiusKm the radius in kilometers
-     * @return true if within radius, false otherwise
-     */
     public boolean isWithinRadius(Location other, double radiusKm) {
         return distanceTo(other) <= radiusKm;
     }

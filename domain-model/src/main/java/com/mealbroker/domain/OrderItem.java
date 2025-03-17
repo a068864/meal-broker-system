@@ -23,10 +23,6 @@ public class OrderItem {
     @JoinColumn(name = "order_id")
     private Order order;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "menu_item_id")
-    private MenuItem menuItem;
-
     @NotNull(message = "Menu item ID is required")
     @Column(name = "menu_item_id", nullable = false)
     private Long menuItemId;
@@ -52,34 +48,18 @@ public class OrderItem {
     @Column(name = "instruction")
     private List<String> specialInstructions = new ArrayList<>();
 
-    /**
-     * Default constructor required by JPA
-     */
     public OrderItem() {
         this.quantity = 1;
         this.price = 0.0;
         this.additionalCharges = 0.0;
     }
 
-    /**
-     * Create an order item with ID and quantity
-     *
-     * @param orderItemId the order item ID
-     * @param quantity    the quantity
-     */
     public OrderItem(Long orderItemId, int quantity) {
         this();
         this.orderItemId = orderItemId;
         this.quantity = Math.max(1, quantity);
     }
 
-    /**
-     * Create an order item with menu item ID, quantity, and price
-     *
-     * @param menuItemId the menu item ID
-     * @param quantity   the quantity
-     * @param price      the price
-     */
     public OrderItem(Long menuItemId, int quantity, double price) {
         this();
         this.menuItemId = menuItemId;
@@ -87,14 +67,6 @@ public class OrderItem {
         this.price = Math.max(0.0, price);
     }
 
-    /**
-     * Create an order item with menu item ID, name, quantity, and price
-     *
-     * @param menuItemId   the menu item ID
-     * @param menuItemName the menu item name
-     * @param quantity     the quantity
-     * @param price        the price
-     */
     public OrderItem(Long menuItemId, String menuItemName, int quantity, double price) {
         this();
         this.menuItemId = menuItemId;
@@ -103,15 +75,6 @@ public class OrderItem {
         this.price = Math.max(0.0, price);
     }
 
-    /**
-     * Create an order item with order item ID, menu item ID, name, quantity, and price
-     *
-     * @param orderItemId  the order item ID
-     * @param menuItemId   the menu item ID
-     * @param menuItemName the menu item name
-     * @param quantity     the quantity
-     * @param price        the price
-     */
     public OrderItem(Long orderItemId, Long menuItemId, String menuItemName, int quantity, double price) {
         this();
         this.orderItemId = orderItemId;
@@ -134,21 +97,14 @@ public class OrderItem {
     }
 
     public void setOrder(Order order) {
-        this.order = order;
-    }
-
-    public MenuItem getMenuItem() {
-        return menuItem;
-    }
-
-    public void setMenuItem(MenuItem menuItem) {
-        this.menuItem = menuItem;
-        if (menuItem != null) {
-            this.menuItemId = menuItem.getMenuItemId();
-            this.menuItemName = menuItem.getName();
-            // Optionally sync price if it should come from the menu item
-            if (this.price <= 0) {
-                this.price = menuItem.getPrice();
+        if (this.order != order) {
+            Order oldOrder = this.order;
+            this.order = order;
+            if (oldOrder != null && oldOrder.getItems().contains(this)) {
+                oldOrder.removeItem(this);
+            }
+            if (order != null && !order.getItems().contains(this)) {
+                order.addItem(this);
             }
         }
     }
@@ -174,7 +130,7 @@ public class OrderItem {
     }
 
     public void setQuantity(int quantity) {
-        this.quantity = Math.max(1, quantity);
+        this.quantity = quantity;
     }
 
     public double getPrice() {
@@ -182,7 +138,7 @@ public class OrderItem {
     }
 
     public void setPrice(double price) {
-        this.price = Math.max(0.0, price);
+        this.price = price;
     }
 
     public double getAdditionalCharges() {
@@ -190,14 +146,9 @@ public class OrderItem {
     }
 
     public void setAdditionalCharges(double additionalCharges) {
-        this.additionalCharges = Math.max(0.0, additionalCharges);
+        this.additionalCharges = additionalCharges;
     }
 
-    /**
-     * Calculate total price including quantity and additional charges
-     *
-     * @return total price
-     */
     public double getTotalPrice() {
         return price * quantity + additionalCharges;
     }
@@ -207,25 +158,18 @@ public class OrderItem {
     }
 
     public void setSpecialInstructions(List<String> specialInstructions) {
-        this.specialInstructions = specialInstructions != null ? specialInstructions : new ArrayList<>();
+        if (specialInstructions == null) {
+            specialInstructions = new ArrayList<>();
+        }
+        this.specialInstructions = specialInstructions;
     }
 
-    /**
-     * Add a special instruction to this order item
-     *
-     * @param instruction the instruction to add
-     */
     public void addSpecialInstruction(String instruction) {
         if (instruction != null && !instruction.trim().isEmpty()) {
             specialInstructions.add(instruction);
         }
     }
 
-    /**
-     * Remove a special instruction from this order item
-     *
-     * @param instruction the instruction to remove
-     */
     public void removeSpecialInstruction(String instruction) {
         specialInstructions.remove(instruction);
     }

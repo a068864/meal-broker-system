@@ -51,24 +51,15 @@ public class Order {
     @Embedded
     private Location customerLocation;
 
-    /**
-     * Default constructor - initializes with current time and NEW status
-     */
     public Order() {
         this.orderTime = new Date();
         this.status = OrderStatus.NEW;
     }
 
-    /**
-     * Create a new order for a customer and restaurant
-     *
-     * @param customer   the ordering customer
-     * @param restaurant the selected restaurant
-     */
     public Order(Customer customer, Restaurant restaurant) {
         this();
-        this.customer = customer;
-        this.restaurant = restaurant;
+        setCustomer(customer);
+        setRestaurant(restaurant);
     }
 
     public Long getOrderId() {
@@ -84,16 +75,15 @@ public class Order {
     }
 
     public void setCustomer(Customer customer) {
-        // Remove from old customer if exists
-        if (this.customer != null && !this.customer.equals(customer)) {
-            this.customer.getOrders().remove(this);
-        }
-
-        this.customer = customer;
-
-        // Add to new customer if not null and not already in customer's orders
-        if (customer != null && !customer.getOrders().contains(this)) {
-            customer.getOrders().add(this);
+        if (this.customer != customer) {
+            Customer oldCustomer = this.customer;
+            this.customer = customer;
+            if (oldCustomer != null && oldCustomer.getOrders().contains(this)) {
+                oldCustomer.removeOrder(this);
+            }
+            if (customer != null && !customer.getOrders().contains(this)) {
+                customer.addOrder(this);
+            }
         }
     }
 
@@ -102,16 +92,15 @@ public class Order {
     }
 
     public void setRestaurant(Restaurant restaurant) {
-        // Remove from old restaurant if exists
-        if (this.restaurant != null && !this.restaurant.equals(restaurant)) {
-            this.restaurant.getOrders().remove(this);
-        }
-
-        this.restaurant = restaurant;
-
-        // Add to new restaurant if not null and not already in restaurant's orders
-        if (restaurant != null && !restaurant.getOrders().contains(this)) {
-            restaurant.getOrders().add(this);
+        if (this.restaurant != restaurant) {
+            Restaurant oldRestaurant = this.restaurant;
+            this.restaurant = restaurant;
+            if (oldRestaurant != null && oldRestaurant.getOrders().contains(this)) {
+                oldRestaurant.getOrders().remove(this);
+            }
+            if (restaurant != null && !restaurant.getOrders().contains(this)) {
+                restaurant.getOrders().add(this);
+            }
         }
     }
 
@@ -124,16 +113,15 @@ public class Order {
     }
 
     public void setBranch(Branch branch) {
-        // Remove from old branch if exists
-        if (this.branch != null && !this.branch.equals(branch)) {
-            this.branch.getOrders().remove(this);
-        }
-
-        this.branch = branch;
-
-        // Add to new branch if not null and not already in branch's orders
-        if (branch != null && !branch.getOrders().contains(this)) {
-            branch.getOrders().add(this);
+        if (this.branch != branch) {
+            Branch oldBranch = this.branch;
+            this.branch = branch;
+            if (oldBranch != null && oldBranch.getOrders().contains(this)) {
+                oldBranch.removeOrder(this);
+            }
+            if (branch != null && !branch.getOrders().contains(this)) {
+                branch.addOrder(this);
+            }
         }
     }
 
@@ -146,10 +134,7 @@ public class Order {
     }
 
     public void setItems(List<OrderItem> items) {
-        // Clear existing items
         this.items.clear();
-
-        // Add all new items and set bidirectional relationship
         if (items != null) {
             for (OrderItem item : items) {
                 addItem(item);
@@ -169,12 +154,6 @@ public class Order {
         return status;
     }
 
-    /**
-     * Update order status with validation of allowed transitions
-     *
-     * @param newStatus the new status to set
-     * @throws IllegalStateException if the status transition is invalid
-     */
     public void setStatus(OrderStatus newStatus) {
         if (status == null || status == OrderStatus.NEW) {
             status = newStatus;
@@ -189,13 +168,6 @@ public class Order {
         }
     }
 
-    /**
-     * Check if a status transition is valid
-     *
-     * @param current current status
-     * @param next    proposed next status
-     * @return true if transition is allowed
-     */
     private boolean isValidStatusTransition(OrderStatus current, OrderStatus next) {
         switch (current) {
             case NEW:
@@ -225,71 +197,52 @@ public class Order {
         this.customerLocation = customerLocation;
     }
 
-    /**
-     * Calculate total price of all order items
-     *
-     * @return total order price
-     */
+    @Transient
     public double calculateTotal() {
         double total = 0.0;
-        if (orderTime != null) {
-            for (OrderItem item : items) {
-                total += item.getPrice() * item.getQuantity();
+        for (OrderItem item : items) {
+            total += item.getPrice() * item.getQuantity();
+            if (item.getAdditionalCharges() > 0.0) {
+                total += item.getAdditionalCharges();
             }
         }
         return total;
     }
 
-    /**
-     * Add an item to this order and establish bidirectional relationship
-     *
-     * @param item the item to add
-     * @return the added item
-     */
     public OrderItem addItem(OrderItem item) {
-        items.add(item);
-        item.setOrder(this);
+        if (item != null && !items.contains(item)) {
+            items.add(item);
+            if (item.getOrder() != this) {
+                item.setOrder(this);
+            }
+        }
         return item;
     }
 
-    /**
-     * Remove an item from this order
-     *
-     * @param item the item to remove
-     * @return true if removed, false otherwise
-     */
     public boolean removeItem(OrderItem item) {
-        boolean removed = items.remove(item);
-        if (removed) {
-            item.setOrder(null);
+        if (item != null && items.remove(item)) {
+            if (item.getOrder() == this) {
+                item.setOrder(null);
+            }
+            return true;
         }
-        return removed;
+        return false;
     }
 
-    /**
-     * Remove an item from this order by ID
-     *
-     * @param orderItemId the ID of the item to remove
-     * @return true if removed, false otherwise
-     */
     public boolean removeItemById(Long orderItemId) {
         for (Iterator<OrderItem> iterator = items.iterator(); iterator.hasNext(); ) {
             OrderItem item = iterator.next();
             if (item.getOrderItemId() != null && item.getOrderItemId().equals(orderItemId)) {
                 iterator.remove();
-                item.setOrder(null);
+                if (item.getOrder() == this) {
+                    item.setOrder(null);
+                }
                 return true;
             }
         }
         return false;
     }
 
-    /**
-     * Get an order item by its ID
-     *
-     * @param orderItemId the item ID to find
-     * @return the order item if found, null otherwise
-     */
     public OrderItem getItemById(Long orderItemId) {
         for (OrderItem item : items) {
             if (item.getOrderItemId() != null && item.getOrderItemId().equals(orderItemId)) {

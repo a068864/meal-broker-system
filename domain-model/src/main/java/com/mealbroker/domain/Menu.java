@@ -24,17 +24,9 @@ public class Menu {
     @OneToOne(mappedBy = "menu")
     private Branch branch;
 
-    /**
-     * Default constructor required by JPA
-     */
     public Menu() {
     }
 
-    /**
-     * Create a new menu with a specific ID
-     *
-     * @param menuId the menu ID
-     */
     public Menu(Long menuId) {
         this.menuId = menuId;
     }
@@ -52,10 +44,7 @@ public class Menu {
     }
 
     public void setItems(List<MenuItem> items) {
-        // Clear existing items
         this.items.clear();
-
-        // Add all new items and set bidirectional relationship
         if (items != null) {
             for (MenuItem item : items) {
                 addItem(item);
@@ -68,35 +57,33 @@ public class Menu {
     }
 
     public void setBranch(Branch branch) {
-        this.branch = branch;
+        if (this.branch != branch) {
+            Branch oldBranch = this.branch;
+            this.branch = branch;
+            if (oldBranch != null && oldBranch.getMenu() == this) {
+                oldBranch.setMenu(null);
+            }
+            if (branch != null && branch.getMenu() != this) {
+                branch.setMenu(this);
+            }
+        }
     }
 
-    /**
-     * Add a menu item to this menu and establish bidirectional relationship
-     *
-     * @param item the item to add
-     */
     public void addItem(MenuItem item) {
-        items.add(item);
-        item.setMenu(this);
+        if (!items.contains(item)) {
+            items.add(item);
+            if (item.getMenu() != this) {
+                item.setMenu(this);
+            }
+        }
     }
 
-    /**
-     * Remove a menu item from this menu
-     *
-     * @param item the item to remove
-     */
     public void removeItem(MenuItem item) {
-        items.remove(item);
-        item.setMenu(null);
+        if (items.remove(item) && item.getMenu() == this) {
+            item.setMenu(null);
+        }
     }
 
-    /**
-     * Get a specific menu item by ID
-     *
-     * @param itemId the item ID to find
-     * @return the menu item if found, null otherwise
-     */
     public MenuItem getItem(Long itemId) {
         for (MenuItem item : items) {
             if (item.getMenuItemId().equals(itemId)) {
@@ -106,12 +93,7 @@ public class Menu {
         return null;
     }
 
-    /**
-     * Update the availability of a specific menu item
-     *
-     * @param itemId    the ID of the item to update
-     * @param available the new availability status
-     */
+
     public void updateItemAvailability(Long itemId, boolean available) {
         MenuItem item = getItem(itemId);
         if (item != null) {
@@ -119,11 +101,6 @@ public class Menu {
         }
     }
 
-    /**
-     * Get list of all available menu items
-     *
-     * @return list of available items
-     */
     public List<MenuItem> getAvailableItems() {
         List<MenuItem> availableItems = new ArrayList<>();
         for (MenuItem item : items) {

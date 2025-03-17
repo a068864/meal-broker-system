@@ -38,33 +38,17 @@ public class Customer {
     @OneToMany(mappedBy = "customer", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = false)
     private List<Order> orders = new ArrayList<>();
 
-    /**
-     * Default constructor required by JPA
-     */
+
     public Customer() {
+
     }
 
-    /**
-     * Create a new customer with basic information
-     *
-     * @param name        the customer's name
-     * @param email       the customer's email
-     * @param phoneNumber the customer's phone number
-     */
     public Customer(String name, String email, String phoneNumber) {
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;
     }
 
-    /**
-     * Create a new customer with ID and basic information
-     *
-     * @param customerId  the customer ID
-     * @param name        the customer's name
-     * @param email       the customer's email
-     * @param phoneNumber the customer's phone number
-     */
     public Customer(Long customerId, String name, String email, String phoneNumber) {
         this.customerId = customerId;
         this.name = name;
@@ -120,27 +104,21 @@ public class Customer {
         this.orders = orders;
     }
 
-    /**
-     * Add an order to this customer and establish bidirectional relationship
-     *
-     * @param order the order to add
-     */
+
     public void addOrder(Order order) {
-        if (!orders.contains(order)) {
+        if (order != null && !orders.contains(order)) {
             orders.add(order);
-            order.setCustomer(this);
+            if (order.getCustomer() != this) {
+                order.setCustomer(this);
+            }
         }
     }
 
-    /**
-     * Remove an order from this customer
-     *
-     * @param order the order to remove
-     */
     public void removeOrder(Order order) {
-        if (orders.contains(order)) {
-            orders.remove(order);
-            order.setCustomer(null);
+        if (order != null && orders.remove(order)) {
+            if (order.getCustomer() == this) {
+                order.setCustomer(null);
+            }
         }
     }
 

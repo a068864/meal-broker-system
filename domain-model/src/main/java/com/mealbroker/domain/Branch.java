@@ -30,7 +30,7 @@ public class Branch {
     private String address;
 
     @Column(name = "is_active")
-    private Boolean isActive = true;
+    private boolean isActive = true;
 
     @Column(name = "operating_radius")
     private Integer operatingRadius = 10;
@@ -48,7 +48,6 @@ public class Branch {
     @OneToMany(mappedBy = "branch", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Order> orders = new ArrayList<>();
 
-    // Constructors
     public Branch() {
     }
 
@@ -101,7 +100,7 @@ public class Branch {
     }
 
     public boolean isActive() {
-        return isActive != null ? isActive : true; // Default to true if null
+        return isActive;
     }
 
     public void setActive(Boolean active) {
@@ -121,9 +120,15 @@ public class Branch {
     }
 
     public void setMenu(Menu menu) {
-        this.menu = menu;
-        if (menu != null && menu.getBranch() != this) {
-            menu.setBranch(this);
+        if (this.menu != menu) {
+            Menu oldMenu = this.menu;
+            this.menu = menu;
+            if (oldMenu != null && oldMenu.getBranch() == this) {
+                oldMenu.setBranch(null);
+            }
+            if (menu != null && menu.getBranch() != this) {
+                menu.setBranch(this);
+            }
         }
     }
 
@@ -132,7 +137,16 @@ public class Branch {
     }
 
     public void setRestaurant(Restaurant restaurant) {
-        this.restaurant = restaurant;
+        if (this.restaurant != restaurant) {
+            Restaurant oldRestaurant = this.restaurant;
+            this.restaurant = restaurant;
+            if (oldRestaurant != null && oldRestaurant.getBranches().contains(this)) {
+                oldRestaurant.removeBranch(this);
+            }
+            if (restaurant != null && !restaurant.getBranches().contains(this)) {
+                restaurant.addBranch(this);
+            }
+        }
     }
 
     public List<Order> getOrders() {
@@ -144,13 +158,18 @@ public class Branch {
     }
 
     public void addOrder(Order order) {
-        orders.add(order);
-        order.setBranch(this);
+        if (!orders.contains(order)) {
+            orders.add(order);
+            if (order.getBranch() != this) {
+                order.setBranch(this);
+            }
+        }
     }
 
     public void removeOrder(Order order) {
-        orders.remove(order);
-        order.setBranch(null);
+        if (orders.remove(order) && order.getBranch() == this) {
+            order.setBranch(null);
+        }
     }
 
     @Override
