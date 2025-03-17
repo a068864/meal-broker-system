@@ -1,0 +1,30 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: restaurant-service
+  datasource:
+    url: jdbc:mysql://restaurant-db:3306/restaurantdb
+    username: ${DB_USERNAME:restaurant_user}
+    password: ${DB_PASSWORD:restaurant_pass}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    show-sql: true
+  config:
+    import: optional:configserver:${CONFIG_SERVER_URI:http://config-server:8888}
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://service-registry:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+logging:
+  level:
+    root: INFO
+    com.mealbroker: DEBUG

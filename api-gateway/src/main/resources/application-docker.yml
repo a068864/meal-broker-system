@@ -1,0 +1,27 @@
+server:
+  port: 8080
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://service-registry:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+spring:
+  security:
+    user:
+      name: ${GATEWAY_USERNAME:admin}
+      password: ${GATEWAY_PASSWORD:admin123}
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: INFO
+    org.springframework.security: INFO
+    com.mealbroker: DEBUG

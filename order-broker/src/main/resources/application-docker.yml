@@ -1,0 +1,32 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: order-broker
+  config:
+    import:
+      - optional:configserver:${CONFIG_SERVER_URI:http://config-server:8888}
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://service-registry:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic
+  circuitbreaker:
+    enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.mealbroker: DEBUG
+    org.springframework.cloud.circuitbreaker: INFO
