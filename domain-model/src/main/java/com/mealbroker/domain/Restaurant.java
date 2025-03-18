@@ -33,7 +33,6 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Order> orders = new ArrayList<>();
 
-
     public Restaurant() {
 
     }
@@ -97,7 +96,6 @@ public class Restaurant {
             }
         }
     }
-
 
     public void removeBranch(Branch branch) {
         if (branch != null && branches.remove(branch)) {

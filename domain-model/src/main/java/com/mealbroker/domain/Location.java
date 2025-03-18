@@ -1,7 +1,6 @@
 package com.mealbroker.domain;
 
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -54,28 +53,6 @@ public class Location implements Serializable {
 
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
-    }
-
-    @Transient
-    public double distanceTo(Location other) {
-        if (other == null) {
-            return Double.MAX_VALUE;
-        }
-
-        double latDistance = Math.toRadians(other.latitude - this.latitude);
-        double lonDistance = Math.toRadians(other.longitude - this.longitude);
-
-        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-                + Math.cos(Math.toRadians(this.latitude)) * Math.cos(Math.toRadians(other.latitude))
-                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
-
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        return EARTH_RADIUS_KM * c;
-    }
-
-    public boolean isWithinRadius(Location other, double radiusKm) {
-        return distanceTo(other) <= radiusKm;
     }
 
     @Override

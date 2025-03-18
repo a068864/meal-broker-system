@@ -38,7 +38,6 @@ public class Customer {
     @OneToMany(mappedBy = "customer", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = false)
     private List<Order> orders = new ArrayList<>();
 
-
     public Customer() {
 
     }
@@ -103,7 +102,6 @@ public class Customer {
     public void setOrders(List<Order> orders) {
         this.orders = orders;
     }
-
 
     public void addOrder(Order order) {
         if (order != null && !orders.contains(order)) {
