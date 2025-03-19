@@ -3,6 +3,7 @@ package com.mealbroker.order.controller;
 import com.mealbroker.domain.OrderStatus;
 import com.mealbroker.domain.dto.OrderDTO;
 import com.mealbroker.domain.dto.OrderStatusUpdateDTO;
+import com.mealbroker.domain.dto.OrderHistoryDTO;
 import com.mealbroker.order.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,5 +102,11 @@ public class OrderController {
     public ResponseEntity<OrderDTO> cancelOrder(@PathVariable Long orderId) {
         OrderDTO cancelledOrder = orderService.cancelOrder(orderId);
         return ResponseEntity.ok(cancelledOrder);
+    }
+
+    @GetMapping("{orderId}/history")
+    public ResponseEntity<List<OrderHistoryDTO>> getOrderHistory(@PathVariable Long orderId) {
+        List<OrderHistoryDTO> histories = orderService.getOrderHistory(orderId);
+        return ResponseEntity.ok(histories);
     }
 }

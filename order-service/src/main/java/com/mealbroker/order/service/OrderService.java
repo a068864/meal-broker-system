@@ -4,6 +4,7 @@ import com.mealbroker.domain.Location;
 import com.mealbroker.domain.OrderStatus;
 import com.mealbroker.domain.dto.OrderDTO;
 import com.mealbroker.domain.dto.OrderItemDTO;
+import com.mealbroker.domain.dto.OrderHistoryDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -120,4 +121,12 @@ public interface OrderService {
      * @return the cancelled order
      */
     OrderDTO cancelOrder(Long orderId);
+
+    /**
+     * Get order history for an order
+     *
+     * @param orderId the order ID
+     * @return list of order history entries
+     */
+    List<OrderHistoryDTO> getOrderHistory(Long orderId);
 }

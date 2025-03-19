@@ -2,9 +2,11 @@ package com.mealbroker.order.service.impl;
 
 import com.mealbroker.domain.*;
 import com.mealbroker.domain.dto.OrderDTO;
+import com.mealbroker.domain.dto.OrderHistoryDTO;
 import com.mealbroker.domain.dto.OrderItemDTO;
 import com.mealbroker.order.exception.OrderNotFoundException;
 import com.mealbroker.order.exception.OrderStatusException;
+import com.mealbroker.order.repository.OrderHistoryRepository;
 import com.mealbroker.order.repository.OrderItemRepository;
 import com.mealbroker.order.repository.OrderRepository;
 import com.mealbroker.order.service.OrderService;
@@ -27,11 +29,13 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final OrderHistoryRepository orderHistoryRepository;
 
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, OrderItemRepository orderItemRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository, OrderItemRepository orderItemRepository, OrderHistoryRepository orderHistoryRepository) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
+        this.orderHistoryRepository = orderHistoryRepository;
     }
 
     @Override
@@ -88,6 +92,15 @@ public class OrderServiceImpl implements OrderService {
 
         // Update order with items
         savedOrder.setItems(orderItems);
+
+        // Create initial history entry for order creation
+        OrderHistory initialHistory = new OrderHistory(
+                savedOrder,
+                null,
+                OrderStatus.NEW,
+                "Order created"
+        );
+        orderHistoryRepository.save(initialHistory);
 
         // Convert to DTO and return
         return convertToDTO(savedOrder);
@@ -190,12 +203,21 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + orderId));
 
+        OrderStatus previousStatus = order.getStatus();
+
         // Validate status transition
-        validateStatusTransition(order.getStatus(), newStatus);
+        validateStatusTransition(previousStatus, newStatus);
 
         // Update status
         order.setStatus(newStatus);
         Order updatedOrder = orderRepository.save(order);
+
+        // Create appropriate notes based on status change
+        String notes = generateStatusChangeNotes(previousStatus, newStatus);
+
+        // Create and save history record
+        OrderHistory history = new OrderHistory(updatedOrder, previousStatus, newStatus, notes);
+        orderHistoryRepository.save(history);
 
         return convertToDTO(updatedOrder);
     }
@@ -206,8 +228,10 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + orderId));
 
+        OrderStatus previousStatus = order.getStatus();
+
         // Check if the order can be cancelled
-        if (order.getStatus() == OrderStatus.COMPLETED) {
+        if (previousStatus == OrderStatus.COMPLETED) {
             throw new OrderStatusException("Cannot cancel a completed order");
         }
 
@@ -215,7 +239,49 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.CANCELLED);
         Order cancelledOrder = orderRepository.save(order);
 
+        // Create and save history record
+        OrderHistory history = new OrderHistory(cancelledOrder, previousStatus, OrderStatus.CANCELLED, "Order cancelled");
+        orderHistoryRepository.save(history);
+
         return convertToDTO(cancelledOrder);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderHistoryDTO> getOrderHistory(Long orderId) {
+        if (!orderRepository.existsById(orderId)) {
+            throw new OrderNotFoundException("Order not found with ID: " + orderId);
+        }
+
+        List<OrderHistory> histories = orderHistoryRepository.findByOrderOrderId(orderId);
+
+        // Convert to DTOs
+        return histories.stream().map(this::convertToHistoryDTO).collect(Collectors.toList());
+    }
+
+    /**
+     * Helper method to generate appropriate notes for status changes
+     */
+    private String generateStatusChangeNotes(OrderStatus previousStatus, OrderStatus newStatus) {
+        if (previousStatus == null) {
+            return "Order created with status " + newStatus;
+        }
+        switch (newStatus) {
+            case PROCESSING:
+                return "Order processing started";
+            case CONFIRMED:
+                return "Order confirmed by restaurant";
+            case IN_PREPARATION:
+                return "Order is being prepared in the kitchen";
+            case READY:
+                return "Order is ready for pickup/delivery";
+            case COMPLETED:
+                return "Order has been delivered/picked up";
+            case CANCELLED:
+                return "Order has been cancelled";
+            default:
+                return "Status changed from " + previousStatus + " to " + newStatus;
+        }
     }
 
     /**
@@ -280,5 +346,19 @@ public class OrderServiceImpl implements OrderService {
         itemDTO.setSpecialInstructions(orderItem.getSpecialInstructions());
 
         return itemDTO;
+    }
+
+    /**
+     * Helper method to convert OrderHistory to OrderHistoryDTO
+     */
+    private OrderHistoryDTO convertToHistoryDTO(OrderHistory history) {
+        return new OrderHistoryDTO(
+                history.getHistoryId(),
+                history.getOrder().getOrderId(),
+                history.getPreviousStatus(),
+                history.getNewStatus(),
+                history.getTimestamp(),
+                history.getNotes()
+        );
     }
 }
