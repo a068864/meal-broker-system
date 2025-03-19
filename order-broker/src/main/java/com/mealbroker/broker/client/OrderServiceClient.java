@@ -61,6 +61,6 @@ public interface OrderServiceClient {
      * @param orderId the orderID
      * @return list of order history entries
      */
-    @GetMapping("/api/orders{orderId}/history")
+    @GetMapping("/api/orders/{orderId}/history")
     List<OrderHistoryDTO> getOrderHistory(@PathVariable Long orderId);
 }
