@@ -8,7 +8,7 @@ public class OrderHistoryDTO {
 
     private Long historyId;
     private Long orderId;
-    private OrderStatus oldStatus;
+    private OrderStatus previousSatus;
     private OrderStatus newStatus;
     private Date timestamp;
     private String notes;
@@ -16,10 +16,10 @@ public class OrderHistoryDTO {
     public OrderHistoryDTO() {
     }
 
-    public OrderHistoryDTO(Long historyId, Long orderId, OrderStatus oldStatus, OrderStatus newStatus, Date timestamp, String notes) {
+    public OrderHistoryDTO(Long historyId, Long orderId, OrderStatus previousSatus, OrderStatus newStatus, Date timestamp, String notes) {
         this.historyId = historyId;
         this.orderId = orderId;
-        this.oldStatus = oldStatus;
+        this.previousSatus = previousSatus;
         this.newStatus = newStatus;
         this.timestamp = timestamp;
         this.notes = notes;
@@ -41,12 +41,16 @@ public class OrderHistoryDTO {
         this.orderId = orderId;
     }
 
-    public OrderStatus getOldStatus() {
-        return oldStatus;
+    public OrderStatus getPreviousStatus() {
+        return previousSatus;
     }
 
     public void setNewStatus(OrderStatus newStatus) {
         this.newStatus = newStatus;
+    }
+
+    public Object getNewStatus() {
+        return newStatus;
     }
 
     public Date getTimestamp() {
@@ -64,4 +68,5 @@ public class OrderHistoryDTO {
     public void setNotes(String notes) {
         this.notes = notes;
     }
+
 }

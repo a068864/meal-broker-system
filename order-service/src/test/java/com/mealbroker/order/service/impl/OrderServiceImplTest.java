@@ -2,8 +2,10 @@ package com.mealbroker.order.service.impl;
 
 import com.mealbroker.domain.*;
 import com.mealbroker.domain.dto.OrderDTO;
+import com.mealbroker.domain.dto.OrderHistoryDTO;
 import com.mealbroker.domain.dto.OrderItemDTO;
 import com.mealbroker.order.exception.OrderNotFoundException;
+import com.mealbroker.order.repository.OrderHistoryRepository;
 import com.mealbroker.order.repository.OrderItemRepository;
 import com.mealbroker.order.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -33,6 +36,9 @@ class OrderServiceImplTest {
     @Mock
     private OrderItemRepository orderItemRepository;
 
+    @Mock
+    private OrderHistoryRepository orderHistoryRepository;
+
     @InjectMocks
     private OrderServiceImpl orderService;
 
@@ -42,6 +48,9 @@ class OrderServiceImplTest {
     private Order order;
     private OrderItem orderItem;
     private Location customerLocation;
+    private OrderHistory orderHistory1;
+    private OrderHistory orderHistory2;
+    private List<OrderHistory> orderHistoryList;
 
     @BeforeEach
     void setUp() {
@@ -69,6 +78,17 @@ class OrderServiceImplTest {
         orderItem = new OrderItem(101L, "Big Mac", 1, 5.99);
         orderItem.setOrderItemId(5L);
         order.addItem(orderItem);
+
+        // Set up order history
+        orderHistory1 = new OrderHistory(order, null, OrderStatus.NEW, "Order created");
+        orderHistory1.setHistoryId(1L);
+        orderHistory1.setTimestamp(new Date());
+
+        orderHistory2 = new OrderHistory(order, OrderStatus.NEW, OrderStatus.PROCESSING, "Order processing started");
+        orderHistory2.setHistoryId(2L);
+        orderHistory2.setTimestamp(new Date());
+
+        orderHistoryList = Arrays.asList(orderHistory1, orderHistory2);
     }
 
     @Test
@@ -97,6 +117,8 @@ class OrderServiceImplTest {
             return savedItem;
         });
 
+        when(orderHistoryRepository.save(any(OrderHistory.class))).thenReturn(orderHistory1);
+
         // Act
         OrderDTO result = orderService.createOrder(orderDTO);
 
@@ -115,6 +137,7 @@ class OrderServiceImplTest {
 
         verify(orderRepository, times(1)).save(any(Order.class));
         verify(orderItemRepository, times(1)).save(any(OrderItem.class));
+        verify(orderHistoryRepository, times(1)).save(any(OrderHistory.class));
     }
 
     @Test
@@ -302,6 +325,7 @@ class OrderServiceImplTest {
         // Arrange
         when(orderRepository.findById(order.getOrderId())).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
+        when(orderHistoryRepository.save(any(OrderHistory.class))).thenReturn(orderHistory2);
 
         // Act
         OrderDTO result = orderService.updateOrderStatus(order.getOrderId(), OrderStatus.PROCESSING);
@@ -312,6 +336,7 @@ class OrderServiceImplTest {
 
         verify(orderRepository, times(1)).findById(order.getOrderId());
         verify(orderRepository, times(1)).save(any(Order.class));
+        verify(orderHistoryRepository, times(1)).save(any(OrderHistory.class));
     }
 
     @Test
@@ -319,6 +344,7 @@ class OrderServiceImplTest {
         // Arrange
         when(orderRepository.findById(order.getOrderId())).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
+        when(orderHistoryRepository.save(any(OrderHistory.class))).thenReturn(new OrderHistory());
 
         // Act
         OrderDTO result = orderService.cancelOrder(order.getOrderId());
@@ -329,5 +355,44 @@ class OrderServiceImplTest {
 
         verify(orderRepository, times(1)).findById(order.getOrderId());
         verify(orderRepository, times(1)).save(any(Order.class));
+        verify(orderHistoryRepository, times(1)).save(any(OrderHistory.class));
+    }
+
+    @Test
+    void getOrderHistory_shouldReturnHistoryList() {
+        // Arrange
+        when(orderRepository.existsById(order.getOrderId())).thenReturn(true);
+        when(orderHistoryRepository.findByOrderOrderId(order.getOrderId())).thenReturn(orderHistoryList);
+
+        // Act
+        List<OrderHistoryDTO> results = orderService.getOrderHistory(order.getOrderId());
+
+        // Assert
+        assertNotNull(results);
+        assertEquals(2, results.size());
+        assertEquals(orderHistory1.getHistoryId(), results.get(0).getHistoryId());
+        assertEquals(orderHistory1.getOrder().getOrderId(), results.get(0).getOrderId());
+        assertEquals(orderHistory1.getNewStatus(), results.get(0).getNewStatus());
+        assertEquals(orderHistory1.getNotes(), results.get(0).getNotes());
+
+        assertEquals(orderHistory2.getHistoryId(), results.get(1).getHistoryId());
+        assertEquals(orderHistory2.getPreviousStatus(), results.get(1).getPreviousStatus());
+        assertEquals(orderHistory2.getNewStatus(), results.get(1).getNewStatus());
+        assertEquals(orderHistory2.getNotes(), results.get(1).getNotes());
+
+        verify(orderRepository, times(1)).existsById(order.getOrderId());
+        verify(orderHistoryRepository, times(1)).findByOrderOrderId(order.getOrderId());
+    }
+
+    @Test
+    void getOrderHistory_orderNotFound_shouldThrowException() {
+        // Arrange
+        Long nonExistentId = 999L;
+        when(orderRepository.existsById(nonExistentId)).thenReturn(false);
+
+        // Act & Assert
+        assertThrows(OrderNotFoundException.class, () -> orderService.getOrderHistory(nonExistentId));
+        verify(orderRepository, times(1)).existsById(nonExistentId);
+        verify(orderHistoryRepository, never()).findByOrderOrderId(anyLong());
     }
 }

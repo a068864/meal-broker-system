@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mealbroker.domain.Location;
 import com.mealbroker.domain.OrderStatus;
 import com.mealbroker.domain.dto.OrderDTO;
+import com.mealbroker.domain.dto.OrderHistoryDTO;
 import com.mealbroker.domain.dto.OrderItemDTO;
 import com.mealbroker.domain.dto.OrderStatusUpdateDTO;
 import com.mealbroker.order.exception.OrderNotFoundException;
@@ -18,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -43,6 +45,7 @@ class OrderControllerTest {
     private OrderDTO orderDTO;
     private OrderItemDTO orderItemDTO;
     private Date orderDate;
+    private List<OrderHistoryDTO> orderHistoryList;
 
     @BeforeEach
     void setUp() {
@@ -63,6 +66,11 @@ class OrderControllerTest {
 
         Location customerLocation = new Location(43.6532, -79.3832);
         orderDTO.setCustomerLocation(customerLocation);
+
+        // Set up order history data
+        OrderHistoryDTO history1 = new OrderHistoryDTO(1L, 4L, null, OrderStatus.NEW, orderDate, "Order created");
+        OrderHistoryDTO history2 = new OrderHistoryDTO(2L, 4L, OrderStatus.NEW, OrderStatus.PROCESSING, new Date(), "Order processing started");
+        orderHistoryList = Arrays.asList(history1, history2);
     }
 
     @Test
@@ -302,5 +310,37 @@ class OrderControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(orderService, times(1)).cancelOrder(orderDTO.getOrderId());
+    }
+
+    @Test
+    void getOrderHistory_shouldReturnHistoryList() throws Exception {
+        // Arrange
+        when(orderService.getOrderHistory(orderDTO.getOrderId())).thenReturn(orderHistoryList);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/orders/{orderId}/history", orderDTO.getOrderId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].historyId").value(orderHistoryList.get(0).getHistoryId()))
+                .andExpect(jsonPath("$[0].orderId").value(orderHistoryList.get(0).getOrderId()))
+                .andExpect(jsonPath("$[0].newStatus").value(orderHistoryList.get(0).getNewStatus().toString()))
+                .andExpect(jsonPath("$[0].notes").value(orderHistoryList.get(0).getNotes()))
+                .andExpect(jsonPath("$[1].historyId").value(orderHistoryList.get(1).getHistoryId()))
+                .andExpect(jsonPath("$[1].previousStatus").value(orderHistoryList.get(1).getPreviousStatus().toString()));
+
+        verify(orderService, times(1)).getOrderHistory(orderDTO.getOrderId());
+    }
+
+    @Test
+    void getOrderHistory_orderNotFound_shouldReturnNotFound() throws Exception {
+        // Arrange
+        Long nonExistentId = 999L;
+        when(orderService.getOrderHistory(nonExistentId))
+                .thenThrow(new OrderNotFoundException("Order not found"));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/orders/{orderId}/history", nonExistentId))
+                .andExpect(status().isNotFound());
+
+        verify(orderService, times(1)).getOrderHistory(nonExistentId);
     }
 }
