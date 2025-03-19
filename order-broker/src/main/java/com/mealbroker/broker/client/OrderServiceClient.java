@@ -2,9 +2,12 @@ package com.mealbroker.broker.client;
 
 import com.mealbroker.domain.OrderStatus;
 import com.mealbroker.domain.dto.OrderCreateRequestDTO;
+import com.mealbroker.domain.dto.OrderHistoryDTO;
 import com.mealbroker.domain.dto.OrderResponseDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * Feign client for the Order Service
@@ -51,4 +54,13 @@ public interface OrderServiceClient {
      */
     @PostMapping("/api/orders/{orderId}/cancel")
     OrderResponseDTO cancelOrder(@PathVariable Long orderId);
+
+    /**
+     * Get order history for an order
+     *
+     * @param orderId the orderID
+     * @return list of order history entries
+     */
+    @GetMapping("/api/orders{orderId}/history")
+    List<OrderHistoryDTO> getOrderHistory(@PathVariable Long orderId);
 }

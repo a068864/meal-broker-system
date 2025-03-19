@@ -72,6 +72,20 @@ public class OrderBrokerController {
     }
 
     /**
+     * Get order history for an order
+     */
+    @GetMapping("/orders/{orderId}/history")
+    public ResponseEntity<List<OrderHistoryDTO>> getOrderHistory(@PathVariable Long orderId) {
+        logger.info("Retrieving order history: Order ID {}", orderId);
+        List<OrderHistoryDTO> histories = brokerService.getOrderHistory(orderId);
+        if (histories == null || histories.isEmpty()) {
+            logger.info("No order history found for order ID {}", orderId);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(histories);
+    }
+
+    /**
      * Find nearby branches for a restaurant
      */
     @PostMapping("/nearby-branches")

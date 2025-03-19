@@ -8,10 +8,7 @@ import com.mealbroker.broker.exception.BrokerException;
 import com.mealbroker.broker.service.OrderBrokerService;
 import com.mealbroker.domain.Branch;
 import com.mealbroker.domain.OrderStatus;
-import com.mealbroker.domain.dto.NearestBranchRequestDTO;
-import com.mealbroker.domain.dto.OrderCreateRequestDTO;
-import com.mealbroker.domain.dto.OrderRequestDTO;
-import com.mealbroker.domain.dto.OrderResponseDTO;
+import com.mealbroker.domain.dto.*;
 import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -59,7 +56,7 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
      */
     @Override
     @Transactional
-    @Retry(name = "placeOrder", fallbackMethod = "placeOrder")
+    @Retry(name = "placeOrder", fallbackMethod = "placeOrderFallback")
     public OrderResponseDTO placeOrder(OrderRequestDTO orderRequest) {
         CircuitBreaker placeOrderCB = circuitBreakerFactory.create("placeOrder");
 
@@ -112,6 +109,16 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
     }
 
     /**
+     * Fallback method for placeOrder
+     */
+    private OrderResponseDTO placeOrderFallback(OrderRequestDTO orderRequest, Throwable throwable) {
+        logger.error("Executing fallback for placeOrder", throwable);
+        OrderResponseDTO errorResponse = new OrderResponseDTO();
+        errorResponse.setMessage("Service unavailable");
+        return errorResponse;
+    }
+
+    /**
      * Update order status
      *
      * @param orderId the order ID
@@ -120,7 +127,7 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
      */
     @Override
     @Transactional
-    @Retry(name = "updateOrderStatus", fallbackMethod = "updateOrderStatus")
+    @Retry(name = "updateOrderStatus", fallbackMethod = "updateOrderStatusFallback")
     public OrderResponseDTO updateOrderStatus(Long orderId, OrderStatus status) {
         CircuitBreaker updateStatusCB = circuitBreakerFactory.create("updateOrderStatus");
 
@@ -135,6 +142,16 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
     }
 
     /**
+     * Fallback method for updateOrderStatus
+     */
+    private OrderResponseDTO updateOrderStatusFallback(OrderRequestDTO orderRequest, Throwable throwable) {
+        logger.error("Executing fallback for updateOrderStatus", throwable);
+        OrderResponseDTO errorResponse = new OrderResponseDTO();
+        errorResponse.setMessage("Service unavailable");
+        return errorResponse;
+    }
+
+    /**
      * Cancel an order
      *
      * @param orderId the order ID
@@ -142,7 +159,7 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
      */
     @Override
     @Transactional
-    @Retry(name = "cancelOrder", fallbackMethod = "cancelOrder")
+    @Retry(name = "cancelOrder", fallbackMethod = "cancelOrderFallback")
     public OrderResponseDTO cancelOrder(Long orderId) {
         CircuitBreaker cancelOrderCB = circuitBreakerFactory.create("cancelOrder");
 
@@ -154,5 +171,43 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
                     errorResponse.setMessage("Failed to cancel order: " + throwable.getMessage());
                     return errorResponse;
                 });
+    }
+
+    /**
+     * Fallback method for cancelOrder
+     */
+    private OrderResponseDTO cancelOrderFallback(OrderRequestDTO orderRequest, Throwable throwable) {
+        logger.error("Executing fallback for cancelOrder", throwable);
+        OrderResponseDTO errorResponse = new OrderResponseDTO();
+        errorResponse.setMessage("Service unavailable");
+        return errorResponse;
+    }
+
+    /**
+     * Get order history for an order
+     *
+     * @param orderId the order ID
+     * @return list of order history entries
+     */
+    @Override
+    @Transactional
+    @Retry(name = "getOrderHistory", fallbackMethod = "getOrderHistoryFallback")
+    public List<OrderHistoryDTO> getOrderHistory(Long orderId) {
+        CircuitBreaker getOrderHistoryCB = circuitBreakerFactory.create("getOrderHistory");
+        return getOrderHistoryCB.run(() -> orderServiceClient.getOrderHistory(orderId),
+                throwable -> {
+                    logger.error("Error retrieving order history", throwable);
+                    return List.of();
+                });
+    }
+
+    /**
+     * Fallback method for getOrderHistory
+     */
+    private OrderResponseDTO getOrderHistoryFallback(OrderRequestDTO orderRequest, Throwable throwable) {
+        logger.error("Executing fallback for getOrderHistory", throwable);
+        OrderResponseDTO errorResponse = new OrderResponseDTO();
+        errorResponse.setMessage("Service unavailable");
+        return errorResponse;
     }
 }
