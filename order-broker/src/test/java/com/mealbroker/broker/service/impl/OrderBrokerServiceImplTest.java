@@ -18,10 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -57,6 +54,7 @@ public class OrderBrokerServiceImplTest {
     private List<Branch> branches;
     private Branch nearestBranch;
     private OrderResponseDTO expectedResponse;
+    private List<OrderHistoryDTO> orderHistoryList;
 
     @BeforeEach
     void setUp() {
@@ -87,6 +85,11 @@ public class OrderBrokerServiceImplTest {
         expectedResponse.setBranchId(1L);
         expectedResponse.setStatus(OrderStatus.NEW);
         expectedResponse.setOrderTime(new Date());
+
+        // Setup order history data
+        OrderHistoryDTO history1 = new OrderHistoryDTO(1L, 1L, null, OrderStatus.NEW, new Date(), "Order created");
+        OrderHistoryDTO history2 = new OrderHistoryDTO(2L, 1L, OrderStatus.NEW, OrderStatus.PROCESSING, new Date(), "Order processing started");
+        orderHistoryList = Arrays.asList(history1, history2);
 
         // Mock circuit breaker behavior
         when(circuitBreakerFactory.create(anyString())).thenReturn(circuitBreaker);
@@ -233,5 +236,41 @@ public class OrderBrokerServiceImplTest {
 
         // Verify method calls
         verify(orderServiceClient).cancelOrder(1L);
+    }
+
+    @Test
+    void getOrderHistory_Success() {
+        // Setup mocks
+        when(orderServiceClient.getOrderHistory(anyLong())).thenReturn(orderHistoryList);
+
+        // Execute test
+        List<OrderHistoryDTO> result = orderBrokerService.getOrderHistory(1L);
+
+        // Verify
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals(OrderStatus.NEW, result.get(0).getNewStatus());
+        assertEquals("Order created", result.get(0).getNotes());
+        assertEquals(OrderStatus.PROCESSING, result.get(1).getNewStatus());
+        assertEquals("Order processing started", result.get(1).getNotes());
+
+        // Verify method calls
+        verify(orderServiceClient).getOrderHistory(1L);
+    }
+
+    @Test
+    void getOrderHistory_EmptyResult() {
+        // Setup mocks
+        when(orderServiceClient.getOrderHistory(anyLong())).thenReturn(Collections.emptyList());
+
+        // Execute test
+        List<OrderHistoryDTO> result = orderBrokerService.getOrderHistory(1L);
+
+        // Verify
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        // Verify method calls
+        verify(orderServiceClient).getOrderHistory(1L);
     }
 }

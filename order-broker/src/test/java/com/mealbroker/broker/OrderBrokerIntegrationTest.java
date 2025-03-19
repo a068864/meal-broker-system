@@ -22,10 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -74,6 +71,7 @@ public class OrderBrokerIntegrationTest {
     private Branch nearestBranch;
     private OrderRequestDTO orderRequest;
     private OrderResponseDTO orderResponse;
+    private List<OrderHistoryDTO> orderHistoryList;
 
     @BeforeEach
     void setUp() {
@@ -105,6 +103,11 @@ public class OrderBrokerIntegrationTest {
         orderResponse.setBranchId(1L);
         orderResponse.setStatus(OrderStatus.NEW);
         orderResponse.setOrderTime(new Date());
+
+        // Setup order history data
+        OrderHistoryDTO history1 = new OrderHistoryDTO(1L, 1L, null, OrderStatus.NEW, new Date(), "Order created");
+        OrderHistoryDTO history2 = new OrderHistoryDTO(2L, 1L, OrderStatus.NEW, OrderStatus.PROCESSING, new Date(), "Order processing started");
+        orderHistoryList = Arrays.asList(history1, history2);
 
         // Mock Circuit Breaker behavior
         when(circuitBreakerFactory.create(anyString())).thenReturn(circuitBreaker);
@@ -165,6 +168,35 @@ public class OrderBrokerIntegrationTest {
                 .andExpect(jsonPath("$.orderId").value(1))
                 .andExpect(jsonPath("$.status").value("CANCELLED"));
     }
+
+    @Test
+    public void testGetOrderHistory() throws Exception {
+        // Setup mock
+        when(orderBrokerService.getOrderHistory(eq(1L))).thenReturn(orderHistoryList);
+
+        // Execute and verify
+        mockMvc.perform(get("/api/broker/orders/{orderId}/history", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].historyId").value(1))
+                .andExpect(jsonPath("$[0].orderId").value(1))
+                .andExpect(jsonPath("$[0].newStatus").value("NEW"))
+                .andExpect(jsonPath("$[0].notes").value("Order created"))
+                .andExpect(jsonPath("$[1].historyId").value(2))
+                .andExpect(jsonPath("$[1].previousStatus").value("NEW"))
+                .andExpect(jsonPath("$[1].newStatus").value("PROCESSING"));
+    }
+
+    @Test
+    public void testGetOrderHistory_NoHistory() throws Exception {
+        // Setup mock
+        when (orderBrokerService.getOrderHistory(eq(1L))).thenReturn(Collections.emptyList());
+
+        // Execute and verify
+        mockMvc.perform(get("/api/broker/orders/{orderId}/history", 1L))
+                .andExpect(status().isNoContent());
+    }
+
 
     @Test
     public void testFindNearbyBranches() throws Exception {
