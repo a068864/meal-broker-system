@@ -102,6 +102,7 @@ If you want to disable data seeding, you can:
 For example:
 
 ```java
+
 @Bean
 @Profile({"dev", "test"})
 @ConditionalOnProperty(name = "app.seeding.enabled", havingValue = "true", matchIfMissing = true)

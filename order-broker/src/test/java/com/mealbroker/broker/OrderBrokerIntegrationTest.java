@@ -15,10 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -45,25 +45,25 @@ public class OrderBrokerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private OrderBrokerService orderBrokerService;
 
-    @MockBean
+    @MockitoBean
     private OrderServiceClient orderServiceClient;
 
-    @MockBean
+    @MockitoBean
     private RestaurantServiceClient restaurantServiceClient;
 
-    @MockBean
+    @MockitoBean
     private CustomerServiceClient customerServiceClient;
 
-    @MockBean
+    @MockitoBean
     private LocationServiceClient locationServiceClient;
 
-    @MockBean
+    @MockitoBean
     private CircuitBreakerFactory circuitBreakerFactory;
 
-    @MockBean
+    @MockitoBean
     private CircuitBreaker circuitBreaker;
 
     private Location customerLocation;
@@ -190,7 +190,7 @@ public class OrderBrokerIntegrationTest {
     @Test
     public void testGetOrderHistory_NoHistory() throws Exception {
         // Setup mock
-        when (orderBrokerService.getOrderHistory(eq(1L))).thenReturn(Collections.emptyList());
+        when(orderBrokerService.getOrderHistory(eq(1L))).thenReturn(Collections.emptyList());
 
         // Execute and verify
         mockMvc.perform(get("/api/broker/orders/{orderId}/history", 1L))

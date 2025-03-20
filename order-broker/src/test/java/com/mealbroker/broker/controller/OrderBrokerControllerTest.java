@@ -51,7 +51,8 @@ class OrderBrokerControllerTest {
     private Location customerLocation;
     private Branch nearestBranch;
     private List<Branch> branches;
-    private List<OrderHistoryDTO> orderHistoryList;;
+    private List<OrderHistoryDTO> orderHistoryList;
+    ;
 
     @BeforeEach
     void setUp() {

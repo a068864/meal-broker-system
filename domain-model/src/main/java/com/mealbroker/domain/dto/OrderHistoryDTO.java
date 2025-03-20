@@ -45,12 +45,12 @@ public class OrderHistoryDTO {
         return previousSatus;
     }
 
-    public void setNewStatus(OrderStatus newStatus) {
-        this.newStatus = newStatus;
-    }
-
     public Object getNewStatus() {
         return newStatus;
+    }
+
+    public void setNewStatus(OrderStatus newStatus) {
+        this.newStatus = newStatus;
     }
 
     public Date getTimestamp() {

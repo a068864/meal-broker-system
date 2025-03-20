@@ -2,6 +2,8 @@ server:
   port: 8888
 
 spring:
+  application:
+    name: config-server
   profiles:
     active: native
   cloud:
@@ -9,19 +11,36 @@ spring:
       server:
         native:
           search-locations: classpath:/config
+
+  # Security Configuration
   security:
     user:
       name: ${CONFIG_SERVER_USERNAME:configuser}
       password: ${CONFIG_SERVER_PASSWORD:configpassword}
 
+# Eureka Client Configuration
 eureka:
   client:
     serviceUrl:
       defaultZone: http://service-registry:8761/eureka/
   instance:
-    prefer-ip-address: true
+    preferIpAddress: true
 
+# Actuator endpoints for health checks
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+
+# Logging configuration
 logging:
   level:
     root: INFO
     org.springframework.cloud: INFO
+    org.springframework.boot: INFO

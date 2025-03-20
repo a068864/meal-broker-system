@@ -18,7 +18,7 @@ spring:
       name: ${CONFIG_SERVER_USERNAME:configuser}
       password: ${CONFIG_SERVER_PASSWORD:configpassword}
 
-# Eureka Client Configuration for Docker
+# Eureka Client Configuration
 eureka:
   client:
     serviceUrl:
