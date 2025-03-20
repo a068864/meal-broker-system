@@ -11,9 +11,13 @@
     </parent>
 
     <artifactId>api-gateway</artifactId>
+    <name>API Gateway</name>
+    <description>API Gateway for the Meal Broker System</description>
+
     <properties>
         <spring-cloud.version>2024.0.0</spring-cloud.version>
     </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -25,9 +29,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <name>API Gateway</name>
-    <description>API Gateway for the Meal Broker System</description>
 
     <dependencies>
         <!-- Spring Cloud Gateway -->
@@ -48,28 +49,22 @@
             <artifactId>spring-cloud-starter-config</artifactId>
         </dependency>
 
-        <!-- Spring Boot Webflux (required by Gateway) -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
-
         <!-- Spring Security for Gateway -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- Spring Cloud LoadBalancer (replaces Ribbon) -->
+        <!-- Spring Cloud LoadBalancer -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
 
-        <!-- For Rate Limiting -->
+        <!-- Domain Model -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+            <groupId>com.mealbroker</groupId>
+            <artifactId>domain-model</artifactId>
         </dependency>
 
         <!-- Test -->
@@ -79,17 +74,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-gateway-mvc</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.mealbroker</groupId>
-            <artifactId>domain-model</artifactId>
         </dependency>
     </dependencies>
 
