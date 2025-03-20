@@ -1,4 +1,3 @@
-# config-server/src/main/resources/config/resilience4j-base.yml
 resilience4j:
   circuitbreaker:
     configs:

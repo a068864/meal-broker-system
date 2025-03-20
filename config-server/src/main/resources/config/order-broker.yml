@@ -1,5 +1,4 @@
 # Configuration for Order Broker Service
-# Located in src/main/resources/config/order-broker.yml
 
 server:
   port: 8082

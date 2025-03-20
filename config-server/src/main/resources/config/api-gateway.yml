@@ -1,5 +1,4 @@
 # Configuration for API Gateway
-# Located in src/main/resources/config/api-gateway.yml
 
 server:
   port: 8080
