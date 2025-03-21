@@ -3,7 +3,6 @@ package com.mealbroker.broker.exception;
 import com.mealbroker.domain.error.ErrorResponse;
 import com.mealbroker.domain.error.ValidationErrorResponse;
 import feign.FeignException;
-import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -46,19 +45,6 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(status));
-    }
-
-    /**
-     * Handle circuit breaker exceptions
-     */
-    @ExceptionHandler(CallNotPermittedException.class)
-    public ResponseEntity<ErrorResponse> handleCallNotPermittedException(CallNotPermittedException ex) {
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.SERVICE_UNAVAILABLE.value(),
-                "Service is currently unavailable. Please try again later.",
-                LocalDateTime.now()
-        );
-        return new ResponseEntity<>(errorResponse, HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     /**

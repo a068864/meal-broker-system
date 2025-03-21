@@ -9,15 +9,13 @@ import com.mealbroker.broker.service.OrderBrokerService;
 import com.mealbroker.domain.Branch;
 import com.mealbroker.domain.OrderStatus;
 import com.mealbroker.domain.dto.*;
-import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
-import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -32,20 +30,17 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
     private final RestaurantServiceClient restaurantServiceClient;
     private final CustomerServiceClient customerServiceClient;
     private final LocationServiceClient locationServiceClient;
-    private final CircuitBreakerFactory circuitBreakerFactory;
 
     @Autowired
     public OrderBrokerServiceImpl(
             OrderServiceClient orderServiceClient,
             RestaurantServiceClient restaurantServiceClient,
             CustomerServiceClient customerServiceClient,
-            LocationServiceClient locationServiceClient,
-            CircuitBreakerFactory circuitBreakerFactory) {
+            LocationServiceClient locationServiceClient) {
         this.orderServiceClient = orderServiceClient;
         this.restaurantServiceClient = restaurantServiceClient;
         this.customerServiceClient = customerServiceClient;
         this.locationServiceClient = locationServiceClient;
-        this.circuitBreakerFactory = circuitBreakerFactory;
     }
 
     /**
@@ -56,11 +51,8 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
      */
     @Override
     @Transactional
-    @Retry(name = "placeOrder", fallbackMethod = "placeOrderFallback")
     public OrderResponseDTO placeOrder(OrderRequestDTO orderRequest) {
-        CircuitBreaker placeOrderCB = circuitBreakerFactory.create("placeOrder");
-
-        return placeOrderCB.run(() -> {
+        try {
             // Validate customer
             boolean isValid = customerServiceClient.validateCustomer(orderRequest.getCustomerId());
             if (!isValid) {
@@ -100,22 +92,12 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
 
             // Create the order
             return orderServiceClient.createOrder(orderCreateRequest);
-        }, throwable -> {
-            logger.error("Error placing order", throwable);
+        } catch (Exception e) {
+            logger.error("Error placing order", e);
             OrderResponseDTO errorResponse = new OrderResponseDTO();
-            errorResponse.setMessage("Failed to place order: " + throwable.getMessage());
+            errorResponse.setMessage("Failed to place order: " + e.getMessage());
             return errorResponse;
-        });
-    }
-
-    /**
-     * Fallback method for placeOrder
-     */
-    private OrderResponseDTO placeOrderFallback(OrderRequestDTO orderRequest, Throwable throwable) {
-        logger.error("Executing fallback for placeOrder", throwable);
-        OrderResponseDTO errorResponse = new OrderResponseDTO();
-        errorResponse.setMessage("Service unavailable");
-        return errorResponse;
+        }
     }
 
     /**
@@ -127,28 +109,15 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
      */
     @Override
     @Transactional
-    @Retry(name = "updateOrderStatus", fallbackMethod = "updateOrderStatusFallback")
     public OrderResponseDTO updateOrderStatus(Long orderId, OrderStatus status) {
-        CircuitBreaker updateStatusCB = circuitBreakerFactory.create("updateOrderStatus");
-
-        return updateStatusCB.run(() ->
-                        orderServiceClient.updateOrderStatus(orderId, status),
-                throwable -> {
-                    logger.error("Error updating order status", throwable);
-                    OrderResponseDTO errorResponse = new OrderResponseDTO();
-                    errorResponse.setMessage("Failed to update order status: " + throwable.getMessage());
-                    return errorResponse;
-                });
-    }
-
-    /**
-     * Fallback method for updateOrderStatus
-     */
-    private OrderResponseDTO updateOrderStatusFallback(OrderRequestDTO orderRequest, Throwable throwable) {
-        logger.error("Executing fallback for updateOrderStatus", throwable);
-        OrderResponseDTO errorResponse = new OrderResponseDTO();
-        errorResponse.setMessage("Service unavailable");
-        return errorResponse;
+        try {
+            return orderServiceClient.updateOrderStatus(orderId, status);
+        } catch (Exception e) {
+            logger.error("Error updating order status", e);
+            OrderResponseDTO errorResponse = new OrderResponseDTO();
+            errorResponse.setMessage("Failed to update order status: " + e.getMessage());
+            return errorResponse;
+        }
     }
 
     /**
@@ -159,28 +128,15 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
      */
     @Override
     @Transactional
-    @Retry(name = "cancelOrder", fallbackMethod = "cancelOrderFallback")
     public OrderResponseDTO cancelOrder(Long orderId) {
-        CircuitBreaker cancelOrderCB = circuitBreakerFactory.create("cancelOrder");
-
-        return cancelOrderCB.run(() ->
-                        orderServiceClient.cancelOrder(orderId),
-                throwable -> {
-                    logger.error("Error cancelling order", throwable);
-                    OrderResponseDTO errorResponse = new OrderResponseDTO();
-                    errorResponse.setMessage("Failed to cancel order: " + throwable.getMessage());
-                    return errorResponse;
-                });
-    }
-
-    /**
-     * Fallback method for cancelOrder
-     */
-    private OrderResponseDTO cancelOrderFallback(OrderRequestDTO orderRequest, Throwable throwable) {
-        logger.error("Executing fallback for cancelOrder", throwable);
-        OrderResponseDTO errorResponse = new OrderResponseDTO();
-        errorResponse.setMessage("Service unavailable");
-        return errorResponse;
+        try {
+            return orderServiceClient.cancelOrder(orderId);
+        } catch (Exception e) {
+            logger.error("Error cancelling order", e);
+            OrderResponseDTO errorResponse = new OrderResponseDTO();
+            errorResponse.setMessage("Failed to cancel order: " + e.getMessage());
+            return errorResponse;
+        }
     }
 
     /**
@@ -191,23 +147,12 @@ public class OrderBrokerServiceImpl implements OrderBrokerService {
      */
     @Override
     @Transactional
-    @Retry(name = "getOrderHistory", fallbackMethod = "getOrderHistoryFallback")
     public List<OrderHistoryDTO> getOrderHistory(Long orderId) {
-        CircuitBreaker getOrderHistoryCB = circuitBreakerFactory.create("getOrderHistory");
-        return getOrderHistoryCB.run(() -> orderServiceClient.getOrderHistory(orderId),
-                throwable -> {
-                    logger.error("Error retrieving order history", throwable);
-                    return List.of();
-                });
-    }
-
-    /**
-     * Fallback method for getOrderHistory
-     */
-    private OrderResponseDTO getOrderHistoryFallback(OrderRequestDTO orderRequest, Throwable throwable) {
-        logger.error("Executing fallback for getOrderHistory", throwable);
-        OrderResponseDTO errorResponse = new OrderResponseDTO();
-        errorResponse.setMessage("Service unavailable");
-        return errorResponse;
+        try {
+            return orderServiceClient.getOrderHistory(orderId);
+        } catch (Exception e) {
+            logger.error("Error retrieving order history", e);
+            return Collections.emptyList();
+        }
     }
 }

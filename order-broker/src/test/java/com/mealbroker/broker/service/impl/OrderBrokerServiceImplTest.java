@@ -15,11 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
-import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 
 import java.util.*;
-import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -39,12 +36,6 @@ public class OrderBrokerServiceImplTest {
 
     @Mock
     private LocationServiceClient locationServiceClient;
-
-    @Mock
-    private CircuitBreakerFactory circuitBreakerFactory;
-
-    @Mock
-    private CircuitBreaker circuitBreaker;
 
     @InjectMocks
     private OrderBrokerServiceImpl orderBrokerService;
@@ -90,13 +81,6 @@ public class OrderBrokerServiceImplTest {
         OrderHistoryDTO history1 = new OrderHistoryDTO(1L, 1L, null, OrderStatus.NEW, new Date(), "Order created");
         OrderHistoryDTO history2 = new OrderHistoryDTO(2L, 1L, OrderStatus.NEW, OrderStatus.PROCESSING, new Date(), "Order processing started");
         orderHistoryList = Arrays.asList(history1, history2);
-
-        // Mock circuit breaker behavior
-        when(circuitBreakerFactory.create(anyString())).thenReturn(circuitBreaker);
-        when(circuitBreaker.run(any(), any())).thenAnswer(invocation -> {
-            Supplier<?> supplier = invocation.getArgument(0);
-            return supplier.get();
-        });
     }
 
     @Test
@@ -131,12 +115,14 @@ public class OrderBrokerServiceImplTest {
         // Setup mocks
         when(customerServiceClient.validateCustomer(anyLong())).thenReturn(false);
 
-        // Execute and verify
-        Exception exception = assertThrows(BrokerException.class, () -> {
-            orderBrokerService.placeOrder(orderRequest);
-        });
+        // Execute test - now will return error response instead of throwing exception
+        OrderResponseDTO actualResponse = orderBrokerService.placeOrder(orderRequest);
 
-        assertTrue(exception.getMessage().contains("Invalid customer ID"));
+        // Verify
+        assertNotNull(actualResponse);
+        assertNotNull(actualResponse.getMessage());
+        assertTrue(actualResponse.getMessage().contains("Invalid customer ID"));
+
         verify(customerServiceClient).validateCustomer(1L);
         verifyNoInteractions(orderServiceClient);
     }
@@ -147,12 +133,14 @@ public class OrderBrokerServiceImplTest {
         when(customerServiceClient.validateCustomer(anyLong())).thenReturn(true);
         when(restaurantServiceClient.getBranchesByRestaurant(anyLong())).thenReturn(Collections.emptyList());
 
-        // Execute and verify
-        Exception exception = assertThrows(BrokerException.class, () -> {
-            orderBrokerService.placeOrder(orderRequest);
-        });
+        // Execute test - now will return error response instead of throwing exception
+        OrderResponseDTO actualResponse = orderBrokerService.placeOrder(orderRequest);
 
-        assertTrue(exception.getMessage().contains("No branches found"));
+        // Verify
+        assertNotNull(actualResponse);
+        assertNotNull(actualResponse.getMessage());
+        assertTrue(actualResponse.getMessage().contains("No branches found"));
+
         verify(customerServiceClient).validateCustomer(1L);
         verify(restaurantServiceClient).getBranchesByRestaurant(1L);
         verifyNoInteractions(orderServiceClient);
@@ -165,12 +153,14 @@ public class OrderBrokerServiceImplTest {
         when(restaurantServiceClient.getBranchesByRestaurant(anyLong())).thenReturn(branches);
         when(locationServiceClient.findNearestBranch(any(NearestBranchRequestDTO.class))).thenReturn(null);
 
-        // Execute and verify
-        Exception exception = assertThrows(BrokerException.class, () -> {
-            orderBrokerService.placeOrder(orderRequest);
-        });
+        // Execute test - now will return error response instead of throwing exception
+        OrderResponseDTO actualResponse = orderBrokerService.placeOrder(orderRequest);
 
-        assertTrue(exception.getMessage().contains("Could not determine the nearest branch"));
+        // Verify
+        assertNotNull(actualResponse);
+        assertNotNull(actualResponse.getMessage());
+        assertTrue(actualResponse.getMessage().contains("Could not determine the nearest branch"));
+
         verify(customerServiceClient).validateCustomer(1L);
         verify(restaurantServiceClient).getBranchesByRestaurant(1L);
         verify(locationServiceClient).findNearestBranch(any(NearestBranchRequestDTO.class));
@@ -185,12 +175,14 @@ public class OrderBrokerServiceImplTest {
         when(locationServiceClient.findNearestBranch(any(NearestBranchRequestDTO.class))).thenReturn(nearestBranch);
         when(restaurantServiceClient.checkItemsAvailability(anyLong(), anyList())).thenReturn(false);
 
-        // Execute and verify
-        Exception exception = assertThrows(BrokerException.class, () -> {
-            orderBrokerService.placeOrder(orderRequest);
-        });
+        // Execute test - now will return error response instead of throwing exception
+        OrderResponseDTO actualResponse = orderBrokerService.placeOrder(orderRequest);
 
-        assertTrue(exception.getMessage().contains("Some items are not available"));
+        // Verify
+        assertNotNull(actualResponse);
+        assertNotNull(actualResponse.getMessage());
+        assertTrue(actualResponse.getMessage().contains("Some items are not available"));
+
         verify(customerServiceClient).validateCustomer(1L);
         verify(restaurantServiceClient).getBranchesByRestaurant(1L);
         verify(locationServiceClient).findNearestBranch(any(NearestBranchRequestDTO.class));

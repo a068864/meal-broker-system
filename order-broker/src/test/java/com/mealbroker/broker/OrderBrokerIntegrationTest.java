@@ -15,17 +15,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
-import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
-import org.springframework.http.MediaType;
-
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -60,12 +55,6 @@ public class OrderBrokerIntegrationTest {
 
     @MockitoBean
     private LocationServiceClient locationServiceClient;
-
-    @MockitoBean
-    private CircuitBreakerFactory circuitBreakerFactory;
-
-    @MockitoBean
-    private CircuitBreaker circuitBreaker;
 
     private Location customerLocation;
     private List<Branch> branches;
@@ -109,13 +98,6 @@ public class OrderBrokerIntegrationTest {
         OrderHistoryDTO history1 = new OrderHistoryDTO(1L, 1L, null, OrderStatus.NEW, new Date(), "Order created");
         OrderHistoryDTO history2 = new OrderHistoryDTO(2L, 1L, OrderStatus.NEW, OrderStatus.PROCESSING, new Date(), "Order processing started");
         orderHistoryList = Arrays.asList(history1, history2);
-
-        // Mock Circuit Breaker behavior
-        when(circuitBreakerFactory.create(anyString())).thenReturn(circuitBreaker);
-        when(circuitBreaker.run(any(Supplier.class), any(Function.class))).thenAnswer(invocation -> {
-            Supplier<?> supplier = invocation.getArgument(0);
-            return supplier.get();
-        });
     }
 
     @Test
@@ -197,7 +179,6 @@ public class OrderBrokerIntegrationTest {
         mockMvc.perform(get("/api/broker/orders/{orderId}/history", 1L))
                 .andExpect(status().isNoContent());
     }
-
 
     @Test
     public void testFindNearbyBranches() throws Exception {

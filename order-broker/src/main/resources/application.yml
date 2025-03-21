@@ -29,4 +29,3 @@ logging:
   level:
     root: INFO
     com.mealbroker: DEBUG
-    org.springframework.cloud.circuitbreaker: INFO
