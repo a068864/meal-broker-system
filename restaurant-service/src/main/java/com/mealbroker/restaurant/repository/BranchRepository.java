@@ -16,14 +16,6 @@ import java.util.List;
 public interface BranchRepository extends JpaRepository<Branch, Long> {
 
     /**
-     * Find branches by restaurant
-     *
-     * @param restaurant the restaurant to search for
-     * @return List of branches for the restaurant
-     */
-    List<Branch> findByRestaurant(Restaurant restaurant);
-
-    /**
      * Find branches by restaurant ID
      *
      * @param restaurantId the restaurant ID to search for

@@ -90,12 +90,12 @@ class LocationServiceImplTest {
         Location mississauga = new Location(43.5890, -79.6441);
         List<Location> locations = Arrays.asList(toronto, vancouver, montreal, calgary);
 
-        // Search within 50km of Mississauga (only Toronto should be included)
+        // Search within 50km of Mississauga
         List<Location> nearbyLocations = locationService.findNearbyLocations(mississauga, locations, 50.0);
         assertEquals(1, nearbyLocations.size());
         assertTrue(nearbyLocations.contains(toronto));
 
-        // Search within 600km of Mississauga (Toronto and Montreal should be included)
+        // Search within 600km of Mississauga
         nearbyLocations = locationService.findNearbyLocations(mississauga, locations, 600.0);
         assertEquals(2, nearbyLocations.size());
         assertTrue(nearbyLocations.contains(toronto));
@@ -290,7 +290,7 @@ class LocationServiceImplTest {
         assertEquals(toronto, route.get(1));
 
         // The rest of the route should contain all destinations
-        assertEquals(5, route.size()); // Start + 4 destinations
+        assertEquals(5, route.size());
         assertTrue(route.contains(toronto));
         assertTrue(route.contains(montreal));
         assertTrue(route.contains(vancouver));

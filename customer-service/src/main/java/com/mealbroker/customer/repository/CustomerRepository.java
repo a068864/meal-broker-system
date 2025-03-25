@@ -29,14 +29,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
      */
     boolean existsByEmail(String email);
 
-    /**
-     * Find a customer by phone number
-     *
-     * @param phoneNumber the phone number to search for
-     * @return Optional containing the customer if found
-     */
-    Optional<Customer> findByPhoneNumber(String phoneNumber);
-
     List<Customer> findByNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrPhoneNumberContainingIgnoreCase(
             String name, String email, String phoneNumber);
 }

@@ -1,7 +1,6 @@
 package com.mealbroker.order.config;
 
 import com.mealbroker.domain.*;
-import com.mealbroker.order.repository.OrderItemRepository;
 import com.mealbroker.order.repository.OrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,13 +25,11 @@ public class OrderDataSeeder {
     private static final Logger logger = LoggerFactory.getLogger(OrderDataSeeder.class);
 
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
     private final Random random = new Random();
 
     @Autowired
-    public OrderDataSeeder(OrderRepository orderRepository, OrderItemRepository orderItemRepository) {
+    public OrderDataSeeder(OrderRepository orderRepository) {
         this.orderRepository = orderRepository;
-        this.orderItemRepository = orderItemRepository;
     }
 
     /**
@@ -132,7 +129,6 @@ public class OrderDataSeeder {
                     }
 
                     item.setOrder(savedOrder);
-                    orderItemRepository.save(item);
                 }
 
                 orders.add(savedOrder);

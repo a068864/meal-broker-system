@@ -4,7 +4,6 @@ import com.mealbroker.broker.client.CustomerServiceClient;
 import com.mealbroker.broker.client.LocationServiceClient;
 import com.mealbroker.broker.client.OrderServiceClient;
 import com.mealbroker.broker.client.RestaurantServiceClient;
-import com.mealbroker.broker.exception.BrokerException;
 import com.mealbroker.domain.Branch;
 import com.mealbroker.domain.Location;
 import com.mealbroker.domain.OrderStatus;

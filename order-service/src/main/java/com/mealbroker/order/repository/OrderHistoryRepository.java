@@ -14,14 +14,6 @@ import java.util.List;
 public interface OrderHistoryRepository extends JpaRepository<OrderHistory, Long> {
 
     /**
-     * Find order history entries by order
-     *
-     * @param order the order
-     * @return list of order history entries
-     */
-    List<OrderHistory> findByOrder(Order order);
-
-    /**
      * Find order history entries by order ID
      *
      * @param orderId the order ID

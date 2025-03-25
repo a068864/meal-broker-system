@@ -6,7 +6,6 @@ import com.mealbroker.domain.dto.OrderHistoryDTO;
 import com.mealbroker.domain.dto.OrderItemDTO;
 import com.mealbroker.order.exception.OrderNotFoundException;
 import com.mealbroker.order.repository.OrderHistoryRepository;
-import com.mealbroker.order.repository.OrderItemRepository;
 import com.mealbroker.order.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,9 +27,6 @@ class OrderServiceImplTest {
 
     @Mock
     private OrderRepository orderRepository;
-
-    @Mock
-    private OrderItemRepository orderItemRepository;
 
     @Mock
     private OrderHistoryRepository orderHistoryRepository;
@@ -107,12 +103,6 @@ class OrderServiceImplTest {
             return savedOrder;
         });
 
-        when(orderItemRepository.save(any(OrderItem.class))).thenAnswer(invocation -> {
-            OrderItem savedItem = invocation.getArgument(0);
-            savedItem.setOrderItemId(5L);
-            return savedItem;
-        });
-
         when(orderHistoryRepository.save(any(OrderHistory.class))).thenReturn(orderHistory1);
 
         // Act
@@ -132,7 +122,6 @@ class OrderServiceImplTest {
         assertEquals("Big Mac", result.getItems().get(0).getMenuItemName());
 
         verify(orderRepository, times(1)).save(any(Order.class));
-        verify(orderItemRepository, times(1)).save(any(OrderItem.class));
         verify(orderHistoryRepository, times(1)).save(any(OrderHistory.class));
     }
 
