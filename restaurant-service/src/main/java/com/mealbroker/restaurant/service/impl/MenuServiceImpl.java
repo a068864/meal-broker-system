@@ -167,6 +167,22 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<MenuItemDTO> getMenuItems(Long branchId) {
+        Branch branch = branchRepository.findById(branchId)
+                .orElseThrow(() -> new BranchNotFoundException("Branch not found with ID: " + branchId));
+
+        Menu menu = branch.getMenu();
+        if (menu == null) {
+            return List.of();
+        }
+
+        return menuItemRepository.findByMenuMenuId(menu.getMenuId()).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<MenuItemDTO> getAvailableMenuItems(Long branchId) {
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new BranchNotFoundException("Branch not found with ID: " + branchId));

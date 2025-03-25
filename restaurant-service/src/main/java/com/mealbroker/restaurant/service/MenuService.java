@@ -62,6 +62,14 @@ public interface MenuService {
     MenuItemDTO updateItemStock(Long menuItemId, int stock);
 
     /**
+     * Get menu items for a branch
+     *
+     * @param branchId the branch ID
+     * @return list of available menu items
+     */
+    List<MenuItemDTO> getMenuItems(Long branchId);
+
+    /**
      * Get available menu items for a branch
      *
      * @param branchId the branch ID

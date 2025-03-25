@@ -28,12 +28,4 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
      * @return List of restaurants with the given cuisine
      */
     List<Restaurant> findByCuisine(String cuisine);
-
-    /**
-     * Check if a restaurant exists with the given name
-     *
-     * @param name the name to check
-     * @return true if a restaurant with the name exists
-     */
-    boolean existsByName(String name);
 }
