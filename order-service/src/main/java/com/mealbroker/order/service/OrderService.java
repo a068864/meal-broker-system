@@ -25,10 +25,6 @@ public interface OrderService {
      */
     OrderDTO createOrder(OrderDTO orderDTO);
 
-    @Transactional
-    OrderDTO createOrder(Long customerId, Long restaurantId, Long branchId,
-                         List<OrderItemDTO> items, Location customerLocation);
-
     /**
      * Get an order by ID
      *

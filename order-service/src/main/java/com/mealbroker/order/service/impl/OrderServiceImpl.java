@@ -7,6 +7,7 @@ import com.mealbroker.domain.dto.OrderItemDTO;
 import com.mealbroker.order.exception.OrderNotFoundException;
 import com.mealbroker.order.exception.OrderStatusException;
 import com.mealbroker.order.repository.OrderHistoryRepository;
+import com.mealbroker.order.repository.OrderItemRepository;
 import com.mealbroker.order.repository.OrderRepository;
 import com.mealbroker.order.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +28,13 @@ import java.util.stream.Collectors;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
     private final OrderHistoryRepository orderHistoryRepository;
 
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, OrderHistoryRepository orderHistoryRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository, OrderItemRepository orderItemRepository, OrderHistoryRepository orderHistoryRepository) {
         this.orderRepository = orderRepository;
+        this.orderItemRepository = orderItemRepository;
         this.orderHistoryRepository = orderHistoryRepository;
     }
 
@@ -59,7 +62,11 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderTime(orderDTO.getOrderTime() != null ? orderDTO.getOrderTime() : new Date());
         order.setCustomerLocation(orderDTO.getCustomerLocation());
 
-        // Create and save order items directly on the order
+        // Save the order first to get an ID
+        Order savedOrder = orderRepository.save(order);
+
+        // Create and save order items
+        List<OrderItem> orderItems = new ArrayList<>();
         for (OrderItemDTO itemDTO : orderDTO.getItems()) {
             OrderItem item = new OrderItem(
                     itemDTO.getMenuItemId(),
@@ -78,11 +85,13 @@ public class OrderServiceImpl implements OrderService {
                 }
             }
 
-            order.addItem(item);
+            item.setOrder(savedOrder);
+            OrderItem savedItem = orderItemRepository.save(item);
+            orderItems.add(savedItem);
         }
 
         // Update order with items
-        Order savedOrder = orderRepository.save(order);
+        savedOrder.setItems(orderItems);
 
         // Create initial history entry for order creation
         OrderHistory initialHistory = new OrderHistory(
@@ -95,18 +104,6 @@ public class OrderServiceImpl implements OrderService {
 
         // Convert to DTO and return
         return convertToDTO(savedOrder);
-    }
-
-    @Override
-    @Transactional
-    public OrderDTO createOrder(Long customerId, Long restaurantId, Long branchId,
-                                List<OrderItemDTO> items, Location customerLocation) {
-        OrderDTO orderDTO = new OrderDTO(customerId, restaurantId);
-        orderDTO.setBranchId(branchId);
-        orderDTO.setItems(items);
-        orderDTO.setCustomerLocation(customerLocation);
-
-        return createOrder(orderDTO);
     }
 
     @Override
