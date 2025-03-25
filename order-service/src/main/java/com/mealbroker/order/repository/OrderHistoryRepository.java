@@ -1,6 +1,5 @@
 package com.mealbroker.order.repository;
 
-import com.mealbroker.domain.Order;
 import com.mealbroker.domain.OrderHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

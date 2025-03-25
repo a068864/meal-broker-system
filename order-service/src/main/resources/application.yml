@@ -4,44 +4,35 @@ server:
 spring:
   application:
     name: order-service
-  profiles:
-    active: dev
   datasource:
-    url: jdbc:h2:mem:orderdb
-    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:servicedb;DB_CLOSE_DELAY=-1
     username: sa
     password:
+    driver-class-name: org.h2.Driver
   jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
-    show-sql: true
     properties:
       hibernate:
         format_sql: true
-    database-platform: org.hibernate.dialect.H2Dialect
   h2:
     console:
       enabled: true
-      path: /h2-console
       settings:
         web-allow-others: true
-
-  # Config server properties (optional)
+      path: /h2-console
   config:
-    import: "optional:configserver:http://localhost:8888"
+    import: optional:configserver:${CONFIG_SERVER_URI:http://config-server:8888}
 
-# Eureka client configuration
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://service-registry:8761/eureka/
   instance:
     prefer-ip-address: true
 
-# Logging
 logging:
   level:
     root: INFO
     com.mealbroker: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
