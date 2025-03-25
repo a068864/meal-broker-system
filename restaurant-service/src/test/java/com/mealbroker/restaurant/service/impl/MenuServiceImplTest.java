@@ -18,10 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -293,6 +290,78 @@ public class MenuServiceImplTest {
         assertFalse(result.isAvailable());
         verify(menuItemRepository, times(1)).findById(1L);
         verify(menuItemRepository, times(1)).save(any(MenuItem.class));
+    }
+
+    @Test
+    void testGetMenuItems_Success() {
+        // Given
+        when(branchRepository.findById(1L)).thenReturn(Optional.of(testBranch));
+        when(menuItemRepository.findByMenuMenuId(testMenu.getMenuId())).thenReturn(menuItemList);
+
+        // When
+        List<MenuItemDTO> results = menuService.getMenuItems(1L);
+
+        // Then
+        assertNotNull(results);
+        assertEquals(menuItemList.size(), results.size());
+        assertEquals("Pizza", results.get(0).getName());
+        assertEquals(10.99, results.get(0).getPrice());
+        assertTrue(results.get(0).isAvailable());
+        assertEquals(10, results.get(0).getStock());
+        assertEquals("Burger", results.get(1).getName());
+        assertEquals(8.99, results.get(1).getPrice());
+        verify(branchRepository, times(1)).findById(1L);
+        verify(menuItemRepository, times(1)).findByMenuMenuId(testMenu.getMenuId());
+    }
+
+    @Test
+    void testGetMenuItems_BranchNotFound() {
+        // Given
+        when(branchRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // When/Then
+        assertThrows(BranchNotFoundException.class, () -> {
+            menuService.getMenuItems(99L);
+        });
+
+        verify(branchRepository, times(1)).findById(99L);
+        verify(menuItemRepository, never()).findByMenuMenuId(anyLong());
+    }
+
+    @Test
+    void testGetMenuItems_BranchWithoutMenu() {
+        // Given
+        Branch branchWithoutMenu = new Branch(2L, "Branch Without Menu", new Location(40.7128, -74.0060));
+        branchWithoutMenu.setMenu(null);
+
+        when(branchRepository.findById(2L)).thenReturn(Optional.of(branchWithoutMenu));
+
+        // When
+        List<MenuItemDTO> results = menuService.getMenuItems(2L);
+
+        // Then
+        assertNotNull(results);
+        assertTrue(results.isEmpty());
+
+        verify(branchRepository, times(1)).findById(2L);
+        verify(menuItemRepository, never()).findByMenuMenuId(anyLong());
+    }
+
+    @Test
+    void testGetMenuItems_EmptyMenuItems() {
+        // Given
+        when(branchRepository.findById(1L)).thenReturn(Optional.of(testBranch));
+        when(menuItemRepository.findByMenuMenuId(testMenu.getMenuId())).thenReturn(Collections.emptyList());
+
+        // When
+        List<MenuItemDTO> results = menuService.getMenuItems(1L);
+
+        // Then
+        assertNotNull(results);
+        assertTrue(results.isEmpty());
+
+        verify(branchRepository, times(1)).findById(1L);
+        verify(menuItemRepository, times(1)).findByMenuMenuId(testMenu.getMenuId());
     }
 
     @Test
